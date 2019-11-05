@@ -21,16 +21,26 @@ namespace {
 
     virtual bool runOnLoop(Loop *L, LPPassManager &LPM) {
 
-      errs() << "I am a loop called " << L->getName() << "!\n";
+      errs() << "I am a loop " << *L << "!\n";
 
 
-      bool isSimple = L->isLoopSimplifyForm();
+      bool IsSimple = L->isLoopSimplifyForm();
 
 
-      errs() << "Am I simple?  " << isSimple << "!\n";
+      errs() << "Am I simple?  " << IsSimple << "!\n";
 
-      // LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
-      // LI.print(errs());
+      if (!IsSimple) {
+        // We don't modify unsimplified loops
+        return false;
+      }
+
+      PHINode *PHI = L->getCanonicalInductionVariable();
+
+      if (PHI != nullptr) {
+        errs() << "Induction variable:  " << *PHI << "!\n";
+      } else {
+        errs() << "No induction variable!\n";
+      }
 
       return false;
     }
