@@ -14,5 +14,5 @@ Build:
 
 Run:
 
-    $ clang -S -emit-llvm foo.c
+    $ clang -S -Xclang -disable-O0-optnone -emit-llvm foo.c
     $ opt -load build/loop-perf/libLoopPerforationPass.* -loop-perf -S foo.ll

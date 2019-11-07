@@ -4,7 +4,7 @@ double res[3][3]; // To store result
 double a[3][3] = {{1, 1, 1}, {2, 2, 2}, {3, 3, 3}};
 double b[3][3] = {{1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
 
-void _p_multiply() {
+void multiply() {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             res[i][j] = 0;
@@ -16,7 +16,7 @@ void _p_multiply() {
 }
 
 int main(int argc, char const *argv[]) {
-    _p_multiply();
+    multiply();
 
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
@@ -26,11 +26,6 @@ int main(int argc, char const *argv[]) {
     }
 
     int n = 10;
-
-    while (n > 0) {
-        n -= 2;
-        printf("%d ", n);
-    }
 
     return 0;
 }
