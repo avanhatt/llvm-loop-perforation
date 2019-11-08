@@ -8,11 +8,17 @@
 #include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/Transforms/Utils.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
+#include "llvm/Support/CommandLine.h"
 using namespace llvm;
 
 namespace {
 
-  int rate = 2;
+  // rate is a command line argument to opt
+  static cl::opt<unsigned> Rate(
+    "rate", // Name of command line arg
+    cl::desc("Increase the induction variable by this amount every iteration"), // -help text
+    cl::init(2) // Default value
+  );
 
   template <typename T>
   bool contains(std::list<T> & l, const T & element)
@@ -32,6 +38,8 @@ namespace {
     }
 
     virtual bool runOnLoop(Loop *L, LPPassManager &LPM) {
+
+      errs() << "Command line rate!: " << Rate << "\n";
 
 
       // Don't perforate loops in main for testability
@@ -84,7 +92,7 @@ namespace {
 
           // Hardcode:
           Type *ConstType = Op->getType();
-          Constant *NewInc = ConstantInt::get(ConstType, rate /*value*/, true /*issigned*/);
+          Constant *NewInc = ConstantInt::get(ConstType, Rate /*value*/, true /*issigned*/);
 
           errs() << "Changing [" << *Op << "] to [" << *NewInc << "]!\n";
 

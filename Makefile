@@ -1,6 +1,8 @@
 .PHONY: pass
 .PRECIOUS: %-phis.ll
 
+RATE ?= 2
+
 pass:
 	cd build; make; cd ..
 
@@ -11,4 +13,4 @@ pass:
 	opt -mem2reg -S $< -o $@
 
 %-perforated.ll: %-phis.ll pass
-	opt -load build/loop-perf/libLoopPerforationPass.* -loop-perf -S $< -o $@
+	opt -load build/loop-perf/libLoopPerforationPass.* -loop-perf -S $< -o $@ -rate $(RATE)
