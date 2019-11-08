@@ -1,7 +1,10 @@
-.PHONY: pass
+.PHONY: pass clean
 .PRECIOUS: %-phis.ll
 
 RATE ?= 2
+
+clean:
+	rm -f {.,tests,benchmarks/*}/*.{ll,bc,out}
 
 pass:
 	cd build; make; cd ..
@@ -14,3 +17,6 @@ pass:
 
 %-perforated.ll: %-phis.ll pass
 	opt -load build/loop-perf/libLoopPerforationPass.* -loop-perf -S $< -o $@ -rate $(RATE)
+
+%.out: %.ll
+	clang -O1 $^ -o $@
