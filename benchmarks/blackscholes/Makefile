@@ -1,17 +1,6 @@
-TARGET := blackscholes
-LDFLAGS := -lm -pthread
-CFLAGS := -pthread -DENABLE_THREADS
+SRC := blackscholes
 
-SOURCES := blackscholes.m4.cpp
+STANDARD_ARGS := 1 in_1k.txt output-standard.txt
+PERFORATED_ARGS := 1 in_1k.txt output-perforated.txt
 
-RUNARGS := 1 in_64K.txt output.txt  # simlarge
-TESTARGS := 1 in_10M.txt output.txt  # native
-# RUNARGS := 4 in_1M.txt output.txt  # in between
-
-CLEANMETOO := output.txt blackscholes.m4.cpp
-
-ACCEPT_DIR := ../../accept
-include $(ACCEPT_DIR)/accept.mk
-
-blackscholes.m4.cpp: blackscholes.c c.m4.pthreads
-	m4 c.m4.pthreads $< > $@
+include ../../Makefile
