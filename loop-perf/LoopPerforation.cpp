@@ -11,6 +11,7 @@
 #include "llvm/Support/CommandLine.h"
 #include "json.hpp"
 #include <fstream>
+#include <sstream>
 using namespace llvm;
 using namespace nlohmann;
 
@@ -49,15 +50,13 @@ namespace {
     json j;
     LoopCountPass() : FunctionPass(ID) { }
 
-    // Write one JSON file per module in the destructor so they are only written once
+    // Write one JSON file in the destructor so it is only written once
     // Expectation: one module per .ll file (but we don't rely on this)
     ~LoopCountPass() {
-      for (auto& e : j.items()) {
-        std::ofstream JsonFile;
-        JsonFile.open(e.key() + ".json");
-        JsonFile << e.value().dump(4) << "\n";
-        JsonFile.close();
-      }
+      std::ofstream JsonFile;
+      JsonFile.open("loop-info.json");
+      JsonFile << j.dump(4) << "\n";
+      JsonFile.close();
     }
 
     void getAnalysisUsage(AnalysisUsage &AU) const {
@@ -89,7 +88,17 @@ namespace {
 
   struct LoopPerforationPass : public LoopPass {
     static char ID;
-    LoopPerforationPass() : LoopPass(ID) {}
+    json j;
+
+    // Read the JSON with each loop's perforation rate
+    LoopPerforationPass() : LoopPass(ID) {
+      std::ifstream JsonFile;
+      std::stringstream buffer;
+      JsonFile.open("loop-rates.json");
+      buffer << JsonFile.rdbuf();
+      JsonFile.close();
+      j = json::parse(buffer.str());
+    }
 
     void getAnalysisUsage(AnalysisUsage &AU) const {
       AU.addRequired<LoopInfoWrapperPass>();
@@ -148,8 +157,9 @@ namespace {
           if (Op == PHI) continue;
 
           // Hardcode:
+          int LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
           Type *ConstType = Op->getType();
-          Constant *NewInc = ConstantInt::get(ConstType, Rate /*value*/, true /*issigned*/);
+          Constant *NewInc = ConstantInt::get(ConstType, LoopRate /*value*/, true /*issigned*/);
 
           errs() << "Changing [" << *Op << "] to [" << *NewInc << "]!\n";
 

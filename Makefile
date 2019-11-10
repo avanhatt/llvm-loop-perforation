@@ -1,4 +1,4 @@
-.PHONY: pass clean benchmark benchmarks
+.PHONY: pass clean benchmark benchmarks %-loop-info
 .PRECIOUS: %-phis.ll
 
 
@@ -18,7 +18,9 @@ pass:
 
 %-phis.ll: %.ll
 	opt -mem2reg -S $< -o $@
-	opt -load $(BUILTDIR)/loop-perf/libLoopPerforationPass.* -loop-count -S -o /dev/null $@
+
+%-loop-info: %-phis.ll
+	opt -load $(BUILTDIR)/loop-perf/libLoopPerforationPass.* -loop-count -S -o /dev/null $<
 
 %-perforated.ll: %-phis.ll pass
 	opt -load $(BUILTDIR)/loop-perf/libLoopPerforationPass.* -loop-perf -S $< -o $@ -rate $(RATE)
