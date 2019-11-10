@@ -14,7 +14,7 @@ pass:
 	cd $(BUILTDIR); make; cd $(LOOP_PERF_DIR)
 
 %.ll: %.c
-	clang -isystem /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include -emit-llvm -Xclang -disable-O0-optnone -S $< -o $@
+	clang -emit-llvm -Xclang -disable-O0-optnone -S $< -o $@
 
 %-phis.ll: %.ll
 	opt -mem2reg -S $< -o $@
