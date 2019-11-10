@@ -9,7 +9,7 @@ BENCHMARK_DIR := $(LOOP_PERF_DIR)/benchmarks
 RATE ?= 2
 
 clean:
-	rm -f {.,tests,benchmarks/*}/*.{ll,bc,out}
+	rm -f {.,tests,benchmarks/*}/*.{ll,bc,out,json}
 
 pass:
 	cd $(BUILD_DIR); make; cd $(LOOP_PERF_DIR)
@@ -22,6 +22,7 @@ pass:
 
 %-phis.ll: %.ll
 	opt -mem2reg -S $< -o $@
+	opt -load $(BUILTDIR)/loop-perf/libLoopPerforationPass.* -loop-count -S -o /dev/null $@
 
 %-perforated.ll: %-phis.ll pass
 	opt -load $(BUILD_DIR)/loop-perf/libLoopPerforationPass.* -loop-perf -S $< -o $@ -rate $(RATE)

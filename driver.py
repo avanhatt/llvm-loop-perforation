@@ -2,13 +2,17 @@ import subprocess
 import time
 
 if __name__ == "__main__":
-	rate = 4
+	subprocess.call(['make', 'clean'])
+	# collect loop info to JSON file
+	make_process = subprocess.Popen(['make', 'tests/matrix_multiply-phis.ll'])
+	make_process.wait()
 	# perforate with one rate sent through the makefile
-	make_process = subprocess.Popen(['make', 'tests/sum-to-n-perforated.ll', 'RATE={}'.format(rate)])
+	rate = 4
+	make_process = subprocess.Popen(['make', 'tests/matrix_multiply-perforated.ll', 'RATE={}'.format(rate)])
 	make_process.wait()
 	# time the execution of the perforated program in the lli interpreter
 	start = time.time()
-	interp_process = subprocess.Popen(['lli', 'tests/sum-to-n-perforated.ll'])
+	interp_process = subprocess.Popen(['lli', 'tests/matrix_multiply-perforated.ll'])
 	interp_process.wait(timeout=2)
 	end = time.time()
 	# get the return code for criticality testing
