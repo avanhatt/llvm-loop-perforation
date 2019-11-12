@@ -105,7 +105,7 @@ namespace {
       std::ifstream JsonFile;
       std::stringstream buffer;
 
-      if(fileexists("loop-rates.json")) {
+      if (fileexists("loop-rates.json")) {
         JsonFile.open("loop-rates.json");
         buffer << JsonFile.rdbuf();
         JsonFile.close();
@@ -170,12 +170,9 @@ namespace {
           if (Op == PHI) continue;
 
           int LoopRate = 1;
-          errs() << "before if j!!!\n";
           if (!j.empty()) {
-            errs() << "wtf!!!\n";
             LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
           }
-          errs() << "after if j!!!\n";
           Type *ConstType = Op->getType();
           Constant *NewInc = ConstantInt::get(ConstType, LoopRate /*value*/, true /*issigned*/);
 
