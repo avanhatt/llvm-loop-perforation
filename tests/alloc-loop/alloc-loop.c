@@ -12,13 +12,13 @@ int do_thing(int n) {
     // fill the slots with some complicated computations
     for (int i = 0; i < n; i ++) {
         for (int j = 0; j < 7 * n; j += (i+1)) {
-            printf("%p,\t %d\n", ptr_array[i] + (j % 10)*sizeof(int), j);
+            //printf("%p,\t %d\n", ptr_array[i] + (j % 10)*sizeof(int), j);
             *(ptr_array[i] + (j % 10)*sizeof(int)) = j;
         }
         for (int j = 0; j < 10; j++) {
             sum += *(ptr_array[i] + (j%10)*sizeof(int));
         }
-        printf("%d\n", sum);
+        //printf("%d\n", sum);
     }
 
     // free all the things.
