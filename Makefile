@@ -15,22 +15,22 @@ pass:
 	cd $(BUILD_DIR); make; cd $(LOOP_PERF_DIR)
 
 %.ll: %.c
-	clang -emit-llvm -Xclang -disable-O0-optnone -S $< -o $@
+	clang $(CFLAGS) -emit-llvm -Xclang -disable-O0-optnone -S $< -o $@
 
 %.ll: %.cpp
-	clang -emit-llvm -Xclang -disable-O0-optnone -S $< -o $@
+	clang $(CFLAGS) -emit-llvm -Xclang -disable-O0-optnone -S $< -o $@
 
 %-phis.ll: %.ll
 	opt -mem2reg -S $< -o $@
 
 %-loop-info: %-phis.ll
-	opt -load $(BUILTDIR)/loop-perf/libLoopPerforationPass.* -loop-count -S -o /dev/null $<
+	opt -load $(BUILD_DIR)/loop-perf/libLoopPerforationPass.* -loop-count -S -o /dev/null $<
 
 %-perforated.ll: %-phis.ll pass
 	opt -load $(BUILD_DIR)/loop-perf/libLoopPerforationPass.* -loop-perf -S $< -o $@ -rate $(RATE)
 
 %.out: %.ll
-	clang -O1 $^ -o $@
+	clang $(CFLAGS) $(LDFLAGS) -O1 $^ -o $@
 
 BENCHMARKS := $(shell ls $(BENCHMARK_DIR))
 BENCHMARK_PATHS := $(addprefix $(BENCHMARK_DIR)/,$(BENCHMARKS))
