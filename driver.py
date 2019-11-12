@@ -17,11 +17,13 @@ if __name__ == "__main__":
 	# `tests/matrix_multiply` is the default target.
 	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
 	parser.add_argument('-t', '--timeout', default=5);
+	parser.add_argument('-e', '--max-error', default=0.1, help="the tolerance below which we will throw out loops");
 
 	args = parser.parse_args();
 
 	target = args.target;
 	TIMEOUT = args.timeout;
+	print(args);
 
 	# target = sys.argv[1] if len(sys.argv) > 1 else 'tests/matrix_multiply';
 	loop_info_path = os.path.join(target, 'loop-info.json')
@@ -97,13 +99,14 @@ if __name__ == "__main__":
 					perforated = get_contents('{}/perforated.txt'.format(target))
 					errors = mod.error(standard, perforated)
 
-					print("error: ", errors)
+					print("errors: ", errors)
 					R['errors'] = errors
 
 				except subprocess.TimeoutExpired:
 					R['time'] = float('inf')
 					R['return_code'] = float('nan')
-					R['error'] = 1
+					R['errors'] = {error_name: 1.0
+					  for error_name in mod.error_names}
 
 				except ValueError:
 					# set all errors to the max value if the program
@@ -121,7 +124,44 @@ if __name__ == "__main__":
 				# print('Return code: {}'.format(return_code))
 				# print('Time for perforated loop: {}'.format(end - start))
 
-	# we now have a collection of {result => indent}
+
+	# assume that same structure for d1, d2. Save in d1
+	def joint_rec_iter(d1,d2, f):
+		for k,v1 in d1.items():
+			v2 = d2[k]
+			if isinstance(v1, dict) and isinstance(v2, dict):
+				joint_rec_iter(v1,v2, f)
+			else:
+				d1[k] = f(v1, v2)
+
+	# we now have a collection of {result => indent}.
+	# In this case, it's a bunch of loops. Merge them together.
+
+	def good_enough( R ):
+		return R['return_code'] == 0 and any(e < args.max_error for e in R['errors'].values())
+
+	# get the maximum perf rate on each loop.
+	def join( perf_rates ):
+		# initialize to bottom
+		rslt = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() };
+
+		for sss in perf_rates:
+			data = json.loads(sss);
+			joint_rec_iter(rslt, data, max);
+
+			# for m, fd in infojson.items():
+			# 	for f, ld in fd.items():
+			# 		for l, v in ld.items():
+		return rslt
+
+	#
+
+	# filter by good enough and then take join of data
+	good = { key : data for key, data in results.items() if good_enough(data) }
+	joined = join(good.keys())
+	print("JOINED", joined)
+
+
 
 	print("All Results collected")
 	print(json.dumps(dict(results), indent=4));
