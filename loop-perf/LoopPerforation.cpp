@@ -12,6 +12,7 @@
 #include "json.hpp"
 #include <fstream>
 #include <sstream>
+
 using namespace llvm;
 using namespace nlohmann;
 
@@ -19,7 +20,7 @@ namespace {
   int fileexists(const char * filename){
     /* try to open file to read */
     FILE *file;
-    if (file = fopen(filename, "r")){
+    if ((file = fopen(filename, "r"))) {
         fclose(file);
         return 1;
     }
@@ -168,10 +169,13 @@ namespace {
         for (auto &Op : Increment->operands()) {
           if (Op == PHI) continue;
 
-          int LoopRate  = 1;
-          if (j) {
+          int LoopRate = 1;
+          errs() << "before if j!!!\n";
+          if (!j.empty()) {
+            errs() << "wtf!!!\n";
             LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
           }
+          errs() << "after if j!!!\n";
           Type *ConstType = Op->getType();
           Constant *NewInc = ConstantInt::get(ConstType, LoopRate /*value*/, true /*issigned*/);
 
