@@ -13,8 +13,8 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Driver program to compile perforated loops, collect results, and choose a point on the frontier")
 	# `tests/matrix_multiply` is the default target.
 	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
-	parser.add_argument('-t', '--timeout', default=5);
-	parser.add_argument('-e', '--max-error', default=0.5, help="the tolerance below which we will throw out loops");
+	parser.add_argument('-t', '--timeout', default=5, type=int,);
+	parser.add_argument('-e', '--max-error', default=0.5, type=float, help="the tolerance below which we will throw out loops");
 
 	args = parser.parse_args();
 
