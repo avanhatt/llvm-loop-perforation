@@ -127,11 +127,7 @@ namespace {
 
     virtual bool runOnLoop(Loop *L, LPPassManager &LPM) {
 
-      // Don't perforate loops in main for testability
       const Function *F = L->getHeader()->getParent();
-      if (F->getName() == "main") {
-        return false;
-      }
 
       // We don't modify unsimplified loops
       bool IsSimple = L->isLoopSimplifyForm();
