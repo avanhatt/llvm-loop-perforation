@@ -62,7 +62,6 @@ if __name__ == "__main__":
 	# sequentially take each loop and perforate at rate 2 (all others at rate 1)
 	for modulename, functdict in infojson.items():
 		for funcname, loopdict in functdict.items():
-			if funcname == 'main': continue
 			for loopname in loopdict:
 				rate_parameters[modulename][funcname][loopname] = 2;
 
