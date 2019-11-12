@@ -10,7 +10,7 @@ def select_next_params():
 
 def choseBest(errors_function, rslts):
 	for rsltstr, R in results.items():
-
+		pass
 
 if __name__ == "__main__":
 	# `tests/matrix_multiply` is the default target.
@@ -40,10 +40,10 @@ if __name__ == "__main__":
 		for funcname, loopdict in functdict.items():
 			if funcname == 'main': continue
 			for loopname in loopdict:
-				data[modulename][funcname][loopname] = 2;
+				rate_parameters[modulename][funcname][loopname] = 2;
 
 				with open('loop-rates.json', 'w') as file:
-					json.dump(data, file, indent=4);
+					json.dump(rate_parameters, file, indent=4);
 
 				# Let's create the dictionary where we collect statistics...
 				R = {}
@@ -66,10 +66,10 @@ if __name__ == "__main__":
 					R['return_code'] = float('nan')
 
 				# put all statistics in the right place:
-				results[json.dumps(data)] = R
+				results[json.dumps(rate_parameters)] = R
 
 				# reset the current loop to 1.
-				data[modulename][funcname][loopname] = 1;
+				rate_parameters[modulename][funcname][loopname] = 1;
 
 				# print('Return code: {}'.format(return_code))
 				# print('Time for perforated loop: {}'.format(end - start))
