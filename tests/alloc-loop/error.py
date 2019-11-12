@@ -1,6 +1,10 @@
 import sys
 from scipy.special import erf
 
+
+names_and_variances = [('erf_variance_1', 1), ('erf_variance_10', 10), ('erf_variance_100', 100)]
+error_names = [name for name, _ in names_and_variances]
+
 def error_function(standard, perforated, variance):
 	return erf(abs(standard - perforated)/variance)
 
@@ -11,7 +15,6 @@ def error(standard, perforated):
 	if perforated == '': perforated = '0'
 	standard = int(standard)
 	perforated = int(perforated)
-	names_and_variances = [('erf_variance_1', 1), ('erf_variance_10', 10), ('erf_variance_100', 100)]
 	return {n: error_function(standard, perforated, v) for n, v in names_and_variances}
 
 def get_contents(fn):

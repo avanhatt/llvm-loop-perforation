@@ -85,6 +85,8 @@ if __name__ == "__main__":
 					# get the return code for criticality testing
 					R['return_code'] = interp_process.returncode
 					R['time'] = end - start
+					if interp_process.returncode != 0:
+						raise ValueError
 
 					# import the error module
 					sys.path.append(target)
@@ -100,6 +102,13 @@ if __name__ == "__main__":
 					R['time'] = float('inf')
 					R['return_code'] = float('nan')
 					R['error'] = 1
+
+				except ValueError:
+					# set all errors to the max value if the program
+					# has a non-zero return code
+					mod = importlib.import_module("error")
+					R['errors'] = {error_name: 1.0
+					  for error_name in mod.error_names}
 
 				# put all statistics in the right place:
 				results[json.dumps(rate_parameters)] = R
