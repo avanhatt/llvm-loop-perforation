@@ -13,13 +13,17 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Driver program to compile perforated loops, collect results, and choose a point on the frontier")
 	# `tests/matrix_multiply` is the default target.
 	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
-	parser.add_argument('-t', '--timeout', default=5);
-	parser.add_argument('-e', '--max-error', default=0.5, help="the tolerance below which we will throw out loops");
+	parser.add_argument('-t', '--timeout', default=5, type=int);
+	parser.add_argument('-e', '--max-error', default=0.5, type=float, help="the tolerance below which we will throw out loops");
+	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5]);
 
 	args = parser.parse_args();
 
-	target = args.target;
-	TIMEOUT = args.timeout;
+	print(args)
+
+	target = args.target
+	TIMEOUT = args.timeout
+	RATES = args.rates
 
 	loop_info_path = os.path.join(target, 'loop-info.json')
 	loop_rates_path = os.path.join(target, 'loop-rates.json')
@@ -108,16 +112,24 @@ if __name__ == "__main__":
 	for modulename, functdict in infojson.items():
 		for funcname, loopdict in functdict.items():
 			for loopname in loopdict:
-				rate_params[modulename][funcname][loopname] = 2;
+				for r in RATES:
+					rate_params[modulename][funcname][loopname] = r;
+					results[json.dumps(rate_params)] = test_perforation(rate_params) # build, and test perforation
+					rate_params[modulename][funcname][loopname] = 1 # reset the current loop to 1.
 
-				# build, and test perforation
-				results[json.dumps(rate_params)] = test_perforation(rate_params);
-				# reset the current loop to 1.
-				rate_params[modulename][funcname][loopname] = 1;
 
 				# print('Return code: {}'.format(return_code))
 				# print('Time for perforated loop: {}'.format(end - start))
 
+
+	def flatten(d, prefix="", target={}):
+		for k,v in d.items():
+			if isinstance(v, dict):
+				flatten(v, prefix+";", target);
+			else:
+				target[prefix+k] = v;
+
+		return target;
 
 	# assume that same structure for d1, d2. Save in d1
 	def joint_rec_iter(d1,d2, f):
@@ -163,6 +175,6 @@ if __name__ == "__main__":
 
 	# dump final
 	RSLT = test_perforation(joined);
-	print("THE JOINED RESULT perfs @ ["+"]", json.dumps(RSLT, indent=4));
+	print("THE JOINED RESULT perfs @ ["+",".join(map(str,flatten(joined).values()))+"]", json.dumps(RSLT, indent=4));
 	if(RSLT['return_code'] != 0):
 		raise RuntimeError("The Joined result produces an error");
