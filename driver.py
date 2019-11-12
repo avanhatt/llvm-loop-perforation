@@ -5,23 +5,22 @@ from collections import defaultdict
 import copy
 import os
 import importlib
+import argparse
 
-TIMEOUT = 5
 
-def select_next_params():
-	pass
-
-def choseBest(errors_function, rslts):
-	for rsltstr, R in results.items():
-		pass
-
-def get_contents(fn):
-	with open(fn, 'r') as f:
-		return f.read()
 
 if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description="Driver program to compile perforated loops, collect results, and choose a point on the frontier")
 	# `tests/matrix_multiply` is the default target.
-	target = sys.argv[1] if len(sys.argv) > 1 else 'tests/matrix_multiply';
+	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
+	parser.add_argument('-t', '--timeout', default=5);
+
+	args = parser.parse_args();
+
+	target = args.target;
+	TIMEOUT = args.timeout;
+	print('******', target, TIMEOUT, args);
+	# target = sys.argv[1] if len(sys.argv) > 1 else 'tests/matrix_multiply';
 	loop_info_path = os.path.join(target, 'loop-info.json')
 	loop_rates_path = os.path.join(target, 'loop-rates.json')
 	results_path = os.path.join(target, 'results.json')
@@ -109,6 +108,8 @@ if __name__ == "__main__":
 
 				# print('Return code: {}'.format(return_code))
 				# print('Time for perforated loop: {}'.format(end - start))
+
+	# we now have a collection of {result => indent}
 
 	print("All Results collected")
 	print(json.dumps(dict(results), indent=4));
