@@ -6,16 +6,18 @@ import copy
 import os
 import importlib
 import argparse
+import re
 
 
 if __name__ == "__main__":
 	## USAGE AND SUCH
 	parser = argparse.ArgumentParser(description="Driver program to compile perforated loops, collect results, and choose a point on the frontier")
 	# `tests/matrix_multiply` is the default target.
-	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
-	parser.add_argument('-t', '--timeout', default=5, type=int);
-	parser.add_argument('-e', '--max-error', default=0.5, type=float, help="the tolerance below which we will throw out loops");
-	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5]);
+	parser.add_argument('target', nargs='?', default='tests/matrix_multiply')
+	parser.add_argument('-t', '--timeout', default=5, type=int)
+	parser.add_argument('-e', '--max-error', default=0.5, type=float, help="the tolerance below which we will throw out loops")
+	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5])
+	parser.add_argument('--error_filter', type=str, required=False, default='.*')
 
 	args = parser.parse_args();
 
@@ -39,6 +41,11 @@ if __name__ == "__main__":
 
 	infojson = json.load(open(loop_info_path, 'r'))
 
+	# import the error module
+	sys.path.append(target)
+	mod = importlib.import_module("error")
+	exp = re.compile(args.error_filter)
+	filtered_error_names = set(n for n in mod.error_names if exp.fullmatch(n))
 
 	def test_perforation(rate_parameters) :
 		with open(loop_rates_path, 'w') as file:
@@ -63,12 +70,9 @@ if __name__ == "__main__":
 			if interp_process.returncode != 0:
 				raise ValueError
 
-			# import the error module
-			sys.path.append(target)
-			mod = importlib.import_module("error")
 			standard = '{}/standard.txt'.format(target)
 			perforated ='{}/perforated.txt'.format(target)
-			errors = mod.error(standard, perforated)
+			errors = {n: e for n, e in mod.error(standard, perforated).items() if n in filtered_error_names}
 
 			print("errors: ", errors)
 			R['errors'] = errors
@@ -77,14 +81,13 @@ if __name__ == "__main__":
 			R['time'] = float('inf')
 			R['return_code'] = float('nan')
 			R['errors'] = {error_name: 1.0
-			  for error_name in mod.error_names}
+			  for error_name in filtered_error_names}
 
 		except ValueError:
 			# set all errors to the max value if the program
 			# has a non-zero return code
-			mod = importlib.import_module("error")
 			R['errors'] = {error_name: 1.0
-			  for error_name in mod.error_names}
+			  for error_name in filtered_error_names}
 
 		return R;
 
@@ -144,7 +147,7 @@ if __name__ == "__main__":
 	# In this case, it's a bunch of loops. Merge them together.
 
 	def good_enough( R ):
-		return R['return_code'] == 0 and any(e < args.max_error for e in R['errors'].values())
+		return R['return_code'] == 0 and any(e < args.max_error for n,e in R['errors'].items())
 
 	# get the maximum perf rate on each loop.
 	def join( perf_rates ):
