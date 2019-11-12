@@ -7,9 +7,12 @@ import os
 import importlib
 import argparse
 
-
+def get_contents(fn):
+	with open(fn, 'r') as f:
+		return f.read()
 
 if __name__ == "__main__":
+	## USAGE AND SUCH
 	parser = argparse.ArgumentParser(description="Driver program to compile perforated loops, collect results, and choose a point on the frontier")
 	# `tests/matrix_multiply` is the default target.
 	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
@@ -19,7 +22,7 @@ if __name__ == "__main__":
 
 	target = args.target;
 	TIMEOUT = args.timeout;
-	print('******', target, TIMEOUT, args);
+
 	# target = sys.argv[1] if len(sys.argv) > 1 else 'tests/matrix_multiply';
 	loop_info_path = os.path.join(target, 'loop-info.json')
 	loop_rates_path = os.path.join(target, 'loop-rates.json')
