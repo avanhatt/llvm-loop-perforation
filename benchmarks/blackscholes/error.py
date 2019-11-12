@@ -19,6 +19,9 @@ def error(standard_fn, perforated_fn):
     standard = vector_from_file(standard_fn)
     perforated = vector_from_file(perforated_fn)
 
-    return {name:
+    results = {name:
       error_function(np.linalg.norm(standard - perforated, ord=norm), variance)
       for name, norm, variance in names_and_args}
+
+    # any nan incurs the max error
+    return {name: (error if not np.isnan(error) else 1.0) for name, error in results.items()}
