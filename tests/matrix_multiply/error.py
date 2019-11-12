@@ -2,6 +2,12 @@ import sys
 import numpy as np
 from scipy.special import erf
 
+names_and_norms = [('l2', 2), ('froebenius', 'fro')]
+variances = [1, 10, 100]
+names_and_args = [('%s_%d' % (name, variance), norm, variance)
+  for name, norm in names_and_norms for variance in variances]
+error_names = [name for name, _, _ in names_and_args]
+
 def string_to_matrix(s):
 	m = np.empty((3,3))
 	for i, row in enumerate(s.split("\n")):
@@ -25,7 +31,7 @@ def error(standard_fn, perforated_fn):
 	variances = [1, 10, 100]
 	return {'%s_%d' % (name, variance):
 	  error_function(np.linalg.norm(standard - perforated, ord=norm), variance)
-	  for name, norm in names_and_norms for variance in variances}
+	  for name, norm, variance in names_and_args}
 
 def get_contents(fn):
 	with open(fn, 'r') as f:
