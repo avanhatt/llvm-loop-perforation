@@ -13,8 +13,8 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description="Driver program to compile perforated loops, collect results, and choose a point on the frontier")
 	# `tests/matrix_multiply` is the default target.
 	parser.add_argument('target', nargs='?', default='tests/matrix_multiply');
-	parser.add_argument('-t', '--timeout', default=5);
-	parser.add_argument('-e', '--max-error', default=0.5, help="the tolerance below which we will throw out loops");
+	parser.add_argument('-t', '--timeout', default=5, type=int);
+	parser.add_argument('-e', '--max-error', default=0.5, type=float, help="the tolerance below which we will throw out loops");
 	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5]);
 
 	args = parser.parse_args();
@@ -111,7 +111,6 @@ if __name__ == "__main__":
 	# sequentially take each loop and perforate at rate 2 (all others at rate 1)
 	for modulename, functdict in infojson.items():
 		for funcname, loopdict in functdict.items():
-			if funcname == 'main': continue
 			for loopname in loopdict:
 				for r in RATES:
 					rate_params[modulename][funcname][loopname] = r;
