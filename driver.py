@@ -2,6 +2,15 @@ import subprocess
 import time, sys
 import json
 from collections import defaultdict
+import copy
+
+
+def select_next_params():
+	pass
+
+def choseBest(errors_function, rslts):
+	for rsltstr, R in results.items():
+
 
 if __name__ == "__main__":
 	# `tests/matrix_multiply` is the default target.
@@ -11,12 +20,17 @@ if __name__ == "__main__":
 	# collect loop info to JSON file
 	make_process = subprocess.Popen(['make', '{}-loop-info'.format(target)])
 	make_process.wait()
-	# perforate with one rate sent through the makefile
+
+
+	# get errors function
+	# errors_function = function()
 
 	infojson = json.load(open('loop-info.json', 'r'))
 	#infojson = json.load(open('tests/{}-phis.ll.json', 'r'))
 
-	data = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() };
+	# set rate parameters to 1.
+	rate_parameters = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() };
+	# rate_parameters = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 1))
 
 	# create results dictionary: {loop rate dict, jsonified} => statistic => value.
 	results = {}
@@ -30,9 +44,6 @@ if __name__ == "__main__":
 
 				with open('loop-rates.json', 'w') as file:
 					json.dump(data, file, indent=4);
-
-
-
 
 				# Let's create the dictionary where we collect statistics...
 				R = {}
@@ -63,6 +74,7 @@ if __name__ == "__main__":
 				# print('Return code: {}'.format(return_code))
 				# print('Time for perforated loop: {}'.format(end - start))
 
+	print("All Results collected")
 	print(json.dumps(dict(results), indent=4));
 	with open('results.json', 'w') as file:
 		json.dump(dict(results), file, indent=4);
