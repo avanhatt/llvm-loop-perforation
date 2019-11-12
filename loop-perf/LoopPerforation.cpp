@@ -102,8 +102,6 @@ namespace {
     }
   };
 
-
-
   struct LoopPerforationPass : public LoopPass {
     static char ID;
     json j;

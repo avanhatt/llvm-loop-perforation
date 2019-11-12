@@ -15,10 +15,6 @@ def choseBest(errors_function, rslts):
 	for rsltstr, R in results.items():
 		pass
 
-def get_contents(fn):
-	with open(fn, 'r') as f:
-		return f.read()
-
 if __name__ == "__main__":
 	# `tests/matrix_multiply` is the default target.
 	target = sys.argv[1] if len(sys.argv) > 1 else 'tests/matrix_multiply';
@@ -89,8 +85,8 @@ if __name__ == "__main__":
 					# import the error module
 					sys.path.append(target)
 					mod = importlib.import_module("error")
-					standard = get_contents('{}/standard.txt'.format(target))
-					perforated = get_contents('{}/perforated.txt'.format(target))
+					standard = '{}/standard.txt'.format(target)
+					perforated ='{}/perforated.txt'.format(target)
 					errors = mod.error(standard, perforated)
 
 					print("error: ", errors)
