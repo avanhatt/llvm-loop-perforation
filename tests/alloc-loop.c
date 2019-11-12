@@ -2,30 +2,29 @@
 #include <stdlib.h>
 
 int do_thing(int n) {
-    int* ptr_array[n];
-		//allocate my space
+    int *ptr_array[n];
+    // allocate my space
     for (int i = 0; i < n; i ++) {
-       ptr_array[i] = (int*)malloc(10*sizeof(int));
+       ptr_array[i] = (int *)malloc(10*sizeof(int));
     }
 
-
-		int sum = 0;
-		// fill the slots with some complicated computations
+    int sum = 0;
+    // fill the slots with some complicated computations
     for (int i = 0; i < n; i ++) {
-			for( int j = 0; j < 7*n; j+= (i+1)) {
-				printf("%p,\t %d\n", ptr_array[i] + (j % 10)*sizeof(int), j);
-       	*(ptr_array[i] + (j % 10)*sizeof(int)) = j;
-		 	}
-			for (int j = 0; j < 10; j++) {
-				sum += *(ptr_array[i] + (j%10)*sizeof(int));
-			}
-			printf("%d\n", sum);
+        for (int j = 0; j < 7 * n; j += (i+1)) {
+            printf("%p,\t %d\n", ptr_array[i] + (j % 10)*sizeof(int), j);
+            *(ptr_array[i] + (j % 10)*sizeof(int)) = j;
+        }
+        for (int j = 0; j < 10; j++) {
+            sum += *(ptr_array[i] + (j%10)*sizeof(int));
+        }
+        printf("%d\n", sum);
     }
 
-		// free all the things.
-		for (int i = 0; i < n; i ++) {
-			 free(ptr_array[i]);
-		}
+    // free all the things.
+    for (int i = 0; i < n; i ++) {
+        free(ptr_array[i]);
+    }
     return sum;
 }
 
