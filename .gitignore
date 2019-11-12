@@ -6,3 +6,8 @@ tests/*.out
 tests/*.json
 benchmarks/*/*.out
 benchmarks/*/*.ll
+**/standard.txt
+**/standard.out
+**/perforated.txt
+**/perforated.out
+**/__pycache__
