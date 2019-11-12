@@ -4,7 +4,11 @@ import numpy as np
 def string_to_matrix(s):
 	m = np.empty((3,3))
 	for i, row in enumerate(s.split("\n")):
+		if not row:
+			continue
 		for j, element in enumerate(row.split(' ')):
+			if not element:
+				continue
 			m[i, j] = float(element)
 	return m
 
@@ -20,8 +24,8 @@ def get_contents(fn):
 		return f.read()
 
 def main():
-	standard_fn = sys.argv[1] if len(sys.argv) > 2 else 'output-standard.txt'
-	perforated_fn = sys.argv[2] if len(sys.argv) > 2 else 'output-perforated.txt'
+	standard_fn = sys.argv[1] if len(sys.argv) > 2 else 'standard.txt'
+	perforated_fn = sys.argv[2] if len(sys.argv) > 2 else 'perforated.txt'
 	standard = get_contents(standard_fn)
 	perforated = get_contents(perforated_fn)
 	print(error(standard, perforated))

@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 import copy
 import os
+import importlib
 
 TIMEOUT = 5
 
@@ -14,12 +15,17 @@ def choseBest(errors_function, rslts):
 	for rsltstr, R in results.items():
 		pass
 
+def get_contents(fn):
+	with open(fn, 'r') as f:
+		return f.read()
+
 if __name__ == "__main__":
 	# `tests/matrix_multiply` is the default target.
 	target = sys.argv[1] if len(sys.argv) > 1 else 'tests/matrix_multiply';
 	loop_info_path = os.path.join(target, 'loop-info.json')
 	loop_rates_path = os.path.join(target, 'loop-rates.json')
 	results_path = os.path.join(target, 'results.json')
+	error_path = os.path.join(target, 'error')
 
 	subprocess.call(['make', 'clean'])
 
@@ -79,9 +85,20 @@ if __name__ == "__main__":
 					# get the return code for criticality testing
 					R['return_code'] = interp_process.returncode
 					R['time'] = end - start
+
+					# import the error module
+					sys.path.append(target)
+					mod = importlib.import_module("error")
+					standard = get_contents('{}/standard.txt'.format(target))
+					perforated = get_contents('{}/perforated.txt'.format(target))
+					error = mod.error(standard, perforated)
+
+					print("error: ", error)
+
 				except subprocess.TimeoutExpired:
 					R['time'] = float('inf')
 					R['return_code'] = float('nan')
+					R['error'] = 1
 
 				# put all statistics in the right place:
 				results[json.dumps(rate_parameters)] = R
