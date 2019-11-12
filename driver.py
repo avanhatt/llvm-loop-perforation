@@ -5,6 +5,8 @@ from collections import defaultdict
 import copy
 
 
+TIMEOUT = 5
+
 def select_next_params():
 	pass
 
@@ -35,6 +37,18 @@ if __name__ == "__main__":
 	# create results dictionary: {loop rate dict, jsonified} => statistic => value.
 	results = {}
 
+	# make the standard version
+	make_process = subprocess.call(['make', 'standard', 'DRIVER_DIR={}'.format(target)])
+
+	# run the standard version
+	run_process = subprocess.Popen(['make', 'standard-run', 'DRIVER_DIR={}'.format(target)])
+	run_process.wait(timeout=TIMEOUT)
+
+	if run_process.returncode:
+		print("Standard run must succeed, failed with return code: {}".format(run_process.returncode))
+		exit(1)
+
+
 	# sequentially take each loop and perforate at rate 2 (all others at rate 1)
 	for modulename, functdict in infojson.items():
 		for funcname, loopdict in functdict.items():
@@ -49,14 +63,14 @@ if __name__ == "__main__":
 				R = {}
 
 				# now run all the other stuff.
-				make_process = subprocess.Popen(['make', '{}-perforated.ll'.format(target)])
+				make_process = subprocess.Popen(['make', 'perforated', 'DRIVER_DIR={}'.format(target)])
 				make_process.wait()
 				# time the execution of the perforated program in the lli interpreter
 
 				try:
 					start = time.time()
-					interp_process = subprocess.Popen(['lli', '{}-perforated.ll'.format(target)])
-					interp_process.wait(timeout=2)
+					interp_process = subprocess.Popen(['./{}-perforated.ll'.format(target)])
+					interp_process.wait(timeout=TIMEOUT)
 					end = time.time()
 					# get the return code for criticality testing
 					R['return_code'] = interp_process.returncode

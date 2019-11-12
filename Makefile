@@ -35,7 +35,7 @@ pass:
 # Driver things
 
 DRIVER_SRC_EXT ?= .c
-DRIVER_SRC := $(DRIVER_DIR)/*$(DRIVER_SRC_EXT)
+DRIVER_SRC := $(shell ls $(DRIVER_DIR)/*$(DRIVER_SRC_EXT))
 
 standard:
 	clang $(CFLAGS) $(LDFLAGS) -O1 $(DRIVER_SRC) -o $(DRIVER_DIR)/standard.out
