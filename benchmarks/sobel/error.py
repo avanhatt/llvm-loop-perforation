@@ -3,11 +3,6 @@ import PIL
 import PIL.Image
 from statistics import mean
 
-IMGDIR = 'saved_outputs'
-
-def load():
-    return 'file:out.pgm'
-
 def error(standard_fn, perforated_fn):
     standard_img = PIL.Image.open(standard_fn)
     perforated_img = PIL.Image.open(perforated_fn)
