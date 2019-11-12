@@ -9,15 +9,7 @@ names_and_args = [('%s_%d' % (name, variance), norm, variance)
 error_names = [name for name, _, _ in names_and_args]
 
 def string_to_matrix(s):
-	m = np.empty((3,3))
-	for i, row in enumerate(s.split("\n")):
-		if not row:
-			continue
-		for j, element in enumerate(row.split(' ')):
-			if not element:
-				continue
-			m[i, j] = float(element)
-	return m
+	return np.asarray([[float(e) for e in l.split()] for l in s.strip().split('\n')])
 
 def error_function(perforated, variance):
 	return erf(abs(perforated)/variance)
@@ -27,6 +19,11 @@ def error(standard_fn, perforated_fn):
 	perforated = get_contents(perforated_fn)
 	standard = string_to_matrix(standard)
 	perforated = string_to_matrix(perforated)
+
+	# max error if sizes differ
+	if standard.shape != perforated.shape:
+		return {name: 1.0 for name in error_names}
+
 	return {name:
 	  error_function(np.linalg.norm(standard - perforated, ord=norm), variance)
 	  for name, norm, variance in names_and_args}
