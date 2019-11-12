@@ -15,23 +15,31 @@
 
 using namespace llvm;
 using namespace nlohmann;
+using namespace std;
 
 namespace {
-  int fileexists(const char * filename){
+  int fileexists(string filename){
     /* try to open file to read */
     FILE *file;
-    if ((file = fopen(filename, "r"))) {
+    if ((file = fopen(filename.c_str(), "r"))) {
         fclose(file);
         return 1;
     }
     return 0;
   }
 
-  // -rate is a command line argument to opt
-  static cl::opt<unsigned> Rate(
-    "rate", // Name of command line arg
-    cl::desc("Increase the induction variable by this amount every iteration"), // -help text
-    cl::init(2) // Default value
+  // -info is a command line argument to opt
+  static cl::opt<string> InfoFilename(
+    "info", // Name of command line arg
+    cl::desc("Specify the filename to write the loop info to"), // -help text
+    cl::init("loop-info.json") // Default value
+  );
+
+  // -rates is a command line argument to opt
+  static cl::opt<string> RatesFilename(
+    "rates", // Name of command line arg
+    cl::desc("Specify the filename to read the loop rates from"), // -help text
+    cl::init("loop-rates.json") // Default value
   );
 
   // Taken from llvm's Loop::Print()
@@ -64,7 +72,7 @@ namespace {
     // Expectation: one module per .ll file (but we don't rely on this)
     ~LoopCountPass() {
       std::ofstream JsonFile;
-      JsonFile.open("loop-info.json");
+      JsonFile.open(InfoFilename);
       JsonFile << j.dump(4) << "\n";
       JsonFile.close();
     }
@@ -105,8 +113,8 @@ namespace {
       std::ifstream JsonFile;
       std::stringstream buffer;
 
-      if (fileexists("loop-rates.json")) {
-        JsonFile.open("loop-rates.json");
+      if (fileexists(RatesFilename)) {
+        JsonFile.open(RatesFilename);
         buffer << JsonFile.rdbuf();
         JsonFile.close();
         j = json::parse(buffer.str());
