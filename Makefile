@@ -32,6 +32,21 @@ pass:
 %.out: %.ll
 	clang $(CFLAGS) $(LDFLAGS) -O1 $^ -o $@
 
+
+DRIVER_DIR := ''
+DRIVER_SRC_EXT := .c
+
+DRIVER_SRC := $(shell ls $(DRIVER_DIR)/*$(DRIVER_SRC_EXT))
+
+standard:
+	clang $(CFLAGS) $(LDFLAGS) -O1 $(DRIVER_SRC) -o  $(DRIVER_DIR)/$@.out > $(DRIVER_DIR)/$@.txt
+
+DRIVER_SRC_PERF := $(DRIVER_SRC:.c=-perforated.ll)
+
+perforated:
+	$(MAKE) $(DRIVER_SRC_PERF)
+	clang $(CFLAGS) $(LDFLAGS) -O1 $(DRIVER_SRC_PERF) -o $(DRIVER_DIR)/$@.out > $(DRIVER_DIR)/$@.txt
+
 BENCHMARKS := $(shell ls $(BENCHMARK_DIR))
 BENCHMARK_PATHS := $(addprefix $(BENCHMARK_DIR)/,$(BENCHMARKS))
 
