@@ -16,6 +16,15 @@ using namespace llvm;
 using namespace nlohmann;
 
 namespace {
+  int fileexists(const char * filename){
+    /* try to open file to read */
+    FILE *file;
+    if (file = fopen(filename, "r")){
+        fclose(file);
+        return 1;
+    }
+    return 0;
+  }
 
   // -rate is a command line argument to opt
   static cl::opt<unsigned> Rate(
@@ -94,10 +103,13 @@ namespace {
     LoopPerforationPass() : LoopPass(ID) {
       std::ifstream JsonFile;
       std::stringstream buffer;
-      JsonFile.open("loop-rates.json");
-      buffer << JsonFile.rdbuf();
-      JsonFile.close();
-      j = json::parse(buffer.str());
+
+      if(fileexists("loop-rates.json")) {
+        JsonFile.open("loop-rates.json");
+        buffer << JsonFile.rdbuf();
+        JsonFile.close();
+        j = json::parse(buffer.str());
+      }
     }
 
     void getAnalysisUsage(AnalysisUsage &AU) const {
@@ -156,8 +168,10 @@ namespace {
         for (auto &Op : Increment->operands()) {
           if (Op == PHI) continue;
 
-          // Hardcode:
-          int LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
+          int LoopRate  = 1;
+          if (j) {
+            LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
+          }
           Type *ConstType = Op->getType();
           Constant *NewInc = ConstantInt::get(ConstType, LoopRate /*value*/, true /*issigned*/);
 
