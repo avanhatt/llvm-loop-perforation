@@ -27,9 +27,7 @@ def error(standard_fn, perforated_fn):
 	perforated = get_contents(perforated_fn)
 	standard = string_to_matrix(standard)
 	perforated = string_to_matrix(perforated)
-	names_and_norms = [('l2', 2), ('froebenius', 'fro')]
-	variances = [1, 10, 100]
-	return {'%s_%d' % (name, variance):
+	return {name:
 	  error_function(np.linalg.norm(standard - perforated, ord=norm), variance)
 	  for name, norm, variance in names_and_args}
 
