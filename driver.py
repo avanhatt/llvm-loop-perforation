@@ -91,9 +91,10 @@ if __name__ == "__main__":
 					mod = importlib.import_module("error")
 					standard = get_contents('{}/standard.txt'.format(target))
 					perforated = get_contents('{}/perforated.txt'.format(target))
-					error = mod.error(standard, perforated)
+					errors = mod.error(standard, perforated)
 
-					print("error: ", error)
+					print("error: ", errors)
+					R['errors'] = errors
 
 				except subprocess.TimeoutExpired:
 					R['time'] = float('inf')

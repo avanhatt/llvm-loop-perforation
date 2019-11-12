@@ -5,6 +5,10 @@ def error_function(standard, perforated, variance):
 	return erf(abs(standard - perforated)/variance)
 
 def error(standard, perforated):
+	standard = standard.strip('\n')
+	perforated = perforated.strip('\n')
+	if standard == '': standard = '0'
+	if perforated == '': perforated = '0'
 	standard = int(standard)
 	perforated = int(perforated)
 	names_and_variances = [('erf_variance_1', 1), ('erf_variance_10', 10), ('erf_variance_100', 100)]

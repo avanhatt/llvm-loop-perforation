@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+from scipy.special import erf
 
 def string_to_matrix(s):
 	m = np.empty((3,3))
@@ -12,12 +13,17 @@ def string_to_matrix(s):
 			m[i, j] = float(element)
 	return m
 
+def error_function(perforated, variance):
+	return erf(abs(perforated)/variance)
+
 def error(standard, perforated):
 	standard = string_to_matrix(standard)
 	perforated = string_to_matrix(perforated)
 	names_and_norms = [('l2', 2), ('froebenius', 'fro')]
-	print(perforated - standard)
-	return {name: np.linalg.norm(standard - perforated, ord=norm) for name, norm in names_and_norms}
+	variances = [1, 10, 100]
+	return {'%s_%d' % (name, variance): 
+	  error_function(np.linalg.norm(standard - perforated, ord=norm), variance)
+	  for name, norm in names_and_norms for variance in variances}
 
 def get_contents(fn):
 	with open(fn, 'r') as f:
