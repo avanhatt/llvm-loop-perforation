@@ -8,9 +8,9 @@ error_names = [name for name, _ in names_and_variances]
 def error_function(standard, perforated, variance):
 	return erf(abs(standard - perforated)/variance)
 
-def error(standard, perforated):
-	standard = standard.strip('\n')
-	perforated = perforated.strip('\n')
+def error(standard_fn, perforated_fn):
+	standard = get_contents(standard_fn).strip('\n')
+	perforated = get_contents(perforated_fn).strip('\n')
 	if standard == '': standard = '0'
 	if perforated == '': perforated = '0'
 	standard = int(standard)
@@ -22,11 +22,9 @@ def get_contents(fn):
 		return f.read()
 
 def main():
-	standard_fn = sys.argv[1] if len(sys.argv) > 2 else 'output-standard.txt'
-	perforated_fn = sys.argv[2] if len(sys.argv) > 2 else 'output-perforated.txt'
-	standard = get_contents(standard_fn)
-	perforated = get_contents(perforated_fn)
-	print(error(standard, perforated))
+	standard_fn = sys.argv[1] if len(sys.argv) > 2 else 'standard.txt'
+	perforated_fn = sys.argv[2] if len(sys.argv) > 2 else 'perforated.txt'
+	print(error(standard_fn, perforated_fn))
 
 if __name__ == '__main__':
 	main()

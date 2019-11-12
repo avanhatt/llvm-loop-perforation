@@ -1,10 +1,5 @@
-SRC := sobel
+STANDARD_ARGS := $(TARGET)/buffalo.pgm
+PERFORATED_ARGS := $(TARGET)/buffalo.pgm
 
-STANDARD_ARGS := buffalo.pgm
-PERFORATED_ARGS := buffalo.pgm
-
-RUN_AFTER_STANDARD := mv out.pgm output-standard.pgm
-RUN_AFTER_PERFORATED := mv out.pgm output-perforated.pgm
-
-include ../../Makefile
-.DEFAULT_GOAL := benchmark
+RUN_AFTER_STANDARD := mv out.pgm $(TARGET)/standard.txt
+RUN_AFTER_PERFORATED := mv out.pgm $(TARGET)/perforated.txt

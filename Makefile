@@ -3,6 +3,9 @@
 
 
 LOOP_PERF_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+
+-include $(TARGET)/Makefile
+
 BUILD_DIR := $(LOOP_PERF_DIR)/build
 BENCHMARK_DIR := $(LOOP_PERF_DIR)/benchmarks
 
@@ -62,22 +65,22 @@ perforated-run:
 
 # Benchmark things
 
-BENCHMARKS := $(shell ls $(BENCHMARK_DIR))
-BENCHMARK_PATHS := $(addprefix $(BENCHMARK_DIR)/,$(BENCHMARKS))
+# BENCHMARKS := $(shell ls $(BENCHMARK_DIR))
+# BENCHMARK_PATHS := $(addprefix $(BENCHMARK_DIR)/,$(BENCHMARKS))
 
-benchmarks:
-	for b in $(BENCHMARK_PATHS); do \
-		make -C $${b} benchmark ; \
-	done
+# benchmarks:
+# 	for b in $(BENCHMARK_PATHS); do \
+# 		make -C $${b} benchmark ; \
+# 	done
 
-# The following code runs per benchmark, based on variables set in each
-STANDARD_EXC := $(addsuffix .out,$(SRC))
-PERFORATED_EXC := $(addsuffix -perforated.out,$(SRC))
+# # The following code runs per benchmark, based on variables set in each
+# STANDARD_EXC := $(addsuffix .out,$(SRC))
+# PERFORATED_EXC := $(addsuffix -perforated.out,$(SRC))
 
-benchmark:
-	$(MAKE) $(STANDARD_EXC)                # Make standard executable
-	$(MAKE) $(PERFORATED_EXC)              # Make perforated executable
-	./$(STANDARD_EXC) $(STANDARD_ARGS)     # Run standard
-	$(RUN_AFTER_STANDARD)
-	./$(PERFORATED_EXC) $(PERFORATED_ARGS) # Run perforated
-	$(RUN_AFTER_PERFORATED)
+# benchmark:
+# 	$(MAKE) $(STANDARD_EXC)                # Make standard executable
+# 	$(MAKE) $(PERFORATED_EXC)              # Make perforated executable
+# 	./$(STANDARD_EXC) $(STANDARD_ARGS)     # Run standard
+# 	$(RUN_AFTER_STANDARD)
+# 	./$(PERFORATED_EXC) $(PERFORATED_ARGS) # Run perforated
+# 	$(RUN_AFTER_PERFORATED)

@@ -22,10 +22,14 @@ def string_to_matrix(s):
 def error_function(perforated, variance):
 	return erf(abs(perforated)/variance)
 
-def error(standard, perforated):
+def error(standard_fn, perforated_fn):
+	standard = get_contents(standard_fn)
+	perforated = get_contents(perforated_fn)
 	standard = string_to_matrix(standard)
 	perforated = string_to_matrix(perforated)
-	return {name: 
+	names_and_norms = [('l2', 2), ('froebenius', 'fro')]
+	variances = [1, 10, 100]
+	return {'%s_%d' % (name, variance):
 	  error_function(np.linalg.norm(standard - perforated, ord=norm), variance)
 	  for name, norm, variance in names_and_args}
 
@@ -36,9 +40,7 @@ def get_contents(fn):
 def main():
 	standard_fn = sys.argv[1] if len(sys.argv) > 2 else 'standard.txt'
 	perforated_fn = sys.argv[2] if len(sys.argv) > 2 else 'perforated.txt'
-	standard = get_contents(standard_fn)
-	perforated = get_contents(perforated_fn)
-	print(error(standard, perforated))
+	print(error(standard_fn, perforated_fn))
 
 if __name__ == '__main__':
 	main()
