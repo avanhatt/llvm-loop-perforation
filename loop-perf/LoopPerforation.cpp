@@ -132,7 +132,6 @@ namespace {
       // We don't modify unsimplified loops
       bool IsSimple = L->isLoopSimplifyForm();
       if (!IsSimple) {
-        errs() << "Loop is not simple, skipping" << *L << "\n";
         return false;
       }
 
@@ -140,11 +139,8 @@ namespace {
       PHINode *PHI = L->getCanonicalInductionVariable();
 
       if (PHI == nullptr) {
-        errs() << "No induction variable! :( \n";
         return false;
       }
-
-      errs() << "Induction variable:  " << *PHI << "!\n";
 
       // Find where the induction variable is modified by finding a user that
       // is also an incoming value to the phi
@@ -153,7 +149,6 @@ namespace {
       for (auto User : PHI->users()) {
         for (auto &Incoming : PHI->incoming_values()) {
           if (Incoming == User) {
-            errs() << "Found the value to change!" << *User << "!\n";
             ValueToChange = Incoming;
             break; // TODO: what if there are multiple?
           }
@@ -161,7 +156,6 @@ namespace {
       }
 
       if (ValueToChange == nullptr) {
-        errs() << "No value to change! :( \n";
         return false;
       }
 
