@@ -104,7 +104,7 @@ if __name__ == "__main__":
 	# no perforation. Choose one place to save it!
 	# results["STANDARD"] = test_perforation(rate_params)
 	intact_result = test_perforation(rate_params)
-	results[json.dumps(rate_params)] =intact_result
+	results['!original_' + json.dumps(rate_params)] =intact_result
 
 	if intact_result['return_code']:
 		raise RuntimeError("Standard run must succeed, failed with return code: {}".format(intact_result['return_code']))
@@ -154,6 +154,8 @@ if __name__ == "__main__":
 		rslt = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() };
 
 		for sss in perf_rates:
+			if '!original_' in sss:
+				sss = sss[10:]
 			data = json.loads(sss);
 			joint_rec_iter(rslt, data, max);
 
@@ -163,11 +165,6 @@ if __name__ == "__main__":
 		return rslt
 
 
-	print("All Results collected")
-	print(json.dumps(dict(results), indent=4));
-	with open(results_path, 'w') as file:
-		json.dump(dict(results), file, indent=4);
-
 	# filter by good enough and then take join of data
 	good = { key : data for key, data in results.items() if good_enough(data) }
 	print("GOOD", json.dumps(good, indent=4));
@@ -176,6 +173,15 @@ if __name__ == "__main__":
 
 	# dump final
 	RSLT = test_perforation(joined);
-	print("THE JOINED RESULT perfs @ ["+",".join(map(str,flatten(joined).values()))+"]", json.dumps(RSLT, indent=4));
+
 	if(RSLT['return_code'] != 0):
 		raise RuntimeError("The Joined result produces an error");
+
+	results['!joined_' + json.dumps(joined)] = RSLT
+	
+	print("All Results collected")
+	print(json.dumps(dict(results), indent=4));
+	with open(results_path, 'w') as file:
+		json.dump(dict(results), file, indent=4);
+
+	print("THE JOINED RESULT perfs @ ["+",".join(map(str,flatten(joined).values()))+"]", json.dumps(RSLT, indent=4));
