@@ -33,20 +33,19 @@ def plot_frontier(data, args) :
 			if i is j: continue
 
 			if t1 >= t2 and all(es1[m] >= es2[m] for m in measures):
-				print(i, ' beats ', j)
 				frontier[i] = False;
 
 	# frontier = [() for t,e in scatterTimeErr ]
-	print(frontier)
 
 	ax = plt.scatter(times, errors, c=np.where(frontier, 'g', 'b'))
 	ax.axes.set_xlabel('Runtime (seconds)')
 	ax.axes.set_ylabel('Normalized error (%s)' % acc_measure)
 
 	# ax.axes.set_xlim([-0.1, ax.axes.get_xlim()[1]])
-	x_step = np.around(times.max()/10, -int(np.ceil(np.log10(times.max())))-2 )
-	print(0, times.max(), x_step)
-	# ax.axes.set_xticks(np.arange(0, times.max(), x_step))
+	x_step = np.around(times.max()/5, -int(np.ceil(np.log10(times.max()))-2) )
+	# if (times.max()
+
+	ax.axes.set_xticks(np.arange(0, times.max(), x_step))
 
 	ax.axes.set_ylim([-0.1,1.1]);
 	ax.axes.set_yticks(np.linspace(0, 1, 11))
