@@ -9,7 +9,7 @@ BUILD_DIR := $(LOOP_PERF_DIR)/build
 BENCHMARK_DIR := $(LOOP_PERF_DIR)/benchmarks
 
 clean:
-	rm -f {.,tests,benchmarks/*}/*.{ll,bc,out,json,standard.txt,perforated.txt}
+	rm -f {.,tests,benchmarks/*}/*.{ll,bc,out,json}
 
 pass:
 	cd $(BUILD_DIR); make; cd $(LOOP_PERF_DIR)
