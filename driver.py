@@ -19,6 +19,7 @@ if __name__ == "__main__":
 	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5])
 	parser.add_argument('--error_filter', type=str, required=False, default='.*')
 
+
 	args = parser.parse_args();
 
 	print(args)
@@ -91,27 +92,26 @@ if __name__ == "__main__":
 
 		return R;
 
-	# make the standard version
-	make_process = subprocess.call(['make', 'standard', 'TARGET={}'.format(target)])
-
-	# run the standard version
-	run_process = subprocess.Popen(['make', 'standard-run', 'TARGET={}'.format(target)])
-	run_process.wait(timeout=TIMEOUT)
-
-	if run_process.returncode:
-		print("Standard run must succeed, failed with return code: {}".format(run_process.returncode))
-		exit(1)
-
-	############# now run perforated versions #############
+	### This is all done below now.
+	# # make, run the standard version
+	# make_process = subprocess.call(['make', 'standard', 'TARGET={}'.format(target)])
+	# run_process = subprocess.Popen(['make', 'standard-run', 'TARGET={}'.format(target)])
+	# run_process.wait(timeout=TIMEOUT)
 
 	# initialize rate parameters to 1.
-	rate_params = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() };
-	# rate_parameters = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: 1))
-
+	rate_params = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() }
 	results = {}	# results dictionary: {loop rate dict, jsonified} => statistic => value.
 
+	# no perforation. Choose one place to save it!
+	# results["STANDARD"] = test_perforation(rate_params)
+	intact_result = test_perforation(rate_params)
+	results[json.dumps(rate_params)] =intact_result
 
-	# sequentially take each loop and perforate at rate 2 (all others at rate 1)
+	if intact_result['return_code']:
+		raise RuntimeError("Standard run must succeed, failed with return code: {}".format(intact_result['return_code']))
+
+	############# now run perforated versions #############
+	# sequentially take each loop and perforate at given rate
 	for modulename, functdict in infojson.items():
 		for funcname, loopdict in functdict.items():
 			for loopname in loopdict:
@@ -174,7 +174,6 @@ if __name__ == "__main__":
 	print("GOOD", json.dumps(good, indent=4));
 	joined = join(good.keys())
 	print("JOINED", joined)
-
 
 	# dump final
 	RSLT = test_perforation(joined);
