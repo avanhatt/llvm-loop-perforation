@@ -9,26 +9,31 @@ import pandas as pd
 sns.set(style="ticks")
 seaborn_colors = sns.color_palette()
 
+def hd(l):
+	return next(iter(l))
+
 """
 data is of the form { [JSON STRING RATES] => {return code: _, time: _, errors: {...}} }
 """
 def plot_frontier(data, args) :
-	measures = next(iter(data.values()))['errors'].keys()
+	measures = hd(hd(data.values()))['errors'].keys()
 
-	'''
-	if args.acc_measure == None:
+	if args.acc_measure == None and len(args.command) > 2:
 		acc_measure = args.command[2]
-	else: # do my maximum entropy:
+	elif not args.acc_measure: # do my maximum entropy:
 		acc_measure, bestent = None, 0
 		for m in measures:
-			ers = [erdata['errors'][m] for erdata in data.values()]
+			ers = [erdat['errors'][m] for erdat_l in data.values() for erdat in erdat_l]
 			ent_m = stats.entropy( np.cumsum(ers) )
 			if ent_m > bestent:
 				acc_measure, bestent = m, ent_m
-	'''
+
 	acc_measure = args.acc_measure
 
-	canonicalList = [ (erdata['time'], erdata['errors']) for erdata in data.values()]
+	canonicalList = [ (erdata['time'], erdata['errors']) for erdatlist in data.values() \
+		for erdata in erdatlist ]
+
+	# print(hd(canonicalList)[1].keys())
 	scatterTimeErr = [ (t, e[acc_measure]) for t,e in canonicalList]
 	times, errors = map(np.array, zip(*scatterTimeErr))
 
@@ -64,16 +69,17 @@ def plot_frontier(data, args) :
 
 def plot_speedups(data, args):
 	# convert to seaborn data format
-	graph_data = pd.DataFrame(columns=['Benchmark', 'Type', 'Time'])
+	graph_data = pd.DataFrame(columns=['Benchmark', 'Type', 'Time', 'Trial'])
 	for benchmark, all_rates in data.items():
-		for rates, errors in all_rates.items():
-			typ = None
-			if '!original_' in rates:
-				typ = 'Original'
-			if '!joined_' in rates:
-				typ = 'Perforated'
-			if typ != None:
-				graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time': errors['time']}, ignore_index=True)
+		for rates, rslt_list in all_rates.items():
+			for j,rslt_dict in enumerate(rslt_list):
+				typ = None
+				if '!original_' in rates:
+					typ = 'Original'
+				if '!joined_' in rates:
+					typ = 'Perforated'
+				if typ != None:
+					graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time': errors['time'], 'Trial' : j}, ignore_index=True)
 	ax = sns.barplot(x="Benchmark", y="Time", hue="Type", data=graph_data)
 	plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 	plt.savefig('speedup.png', bbox_inches='tight', dpi=400)
@@ -87,12 +93,12 @@ if __name__ == '__main__':
 	# parser.add_argument('target', nargs='?', default='tests/matrix_multiply')
 	parser.add_argument('--show', action='store_true', help="")
 	parser.add_argument('--target', help="", required=False, default=None)
-	parser.add_argument('--acc_measure', help="accuracy measure", required=False, default=None)
+	parser.add_argument('--acc-measure', help="accuracy measure", required=False, default=None)
 
 	args = parser.parse_args()
 
 	if args.command[0] == "frontier":
-		if args.target == None and len(args.command > 1):
+		if args.target == None and len(args.command) > 1:
 			args.target = args.command[1];
 
 		with open(os.path.join(args.target, 'results.json'), 'r') as rf:
