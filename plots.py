@@ -5,6 +5,7 @@ import os
 import numpy as np
 from scipy import stats
 import seaborn as sns
+import pandas as pd
 sns.set(style="ticks")
 seaborn_colors = sns.color_palette()
 
@@ -14,6 +15,7 @@ data is of the form { [JSON STRING RATES] => {return code: _, time: _, errors: {
 def plot_frontier(data, args) :
 	measures = next(iter(data.values()))['errors'].keys()
 
+	'''
 	if args.acc_measure == None:
 		acc_measure = args.command[2]
 	else: # do my maximum entropy:
@@ -23,7 +25,8 @@ def plot_frontier(data, args) :
 			ent_m = stats.entropy( np.cumsum(ers) )
 			if ent_m > bestent:
 				acc_measure, bestent = m, ent_m
-
+	'''
+	acc_measure = args.acc_measure
 
 	canonicalList = [ (erdata['time'], erdata['errors']) for erdata in data.values()]
 	scatterTimeErr = [ (t, e[acc_measure]) for t,e in canonicalList]
@@ -60,13 +63,23 @@ def plot_frontier(data, args) :
 
 
 def plot_speedups(data, args):
-	print(data)
-
-	# plt.savefig(os.path.join(args.target, 'frontier.png'), dpi=400)
-	# plt.bar(data)
-
+	# convert to seaborn data format
+	graph_data = pd.DataFrame(columns=['Benchmark', 'Type', 'Time'])
+	for benchmark, all_rates in data.items():
+		for rates, errors in all_rates.items():
+			typ = None
+			if '!original_' in rates:
+				typ = 'Original'
+			if '!joined_' in rates:
+				typ = 'Perforated'
+			if typ != None:
+				graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time': errors['time']}, ignore_index=True)
+	ax = sns.barplot(x="Benchmark", y="Time", hue="Type", data=graph_data)
+	plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+	plt.savefig('speedup.png', bbox_inches='tight', dpi=400)
 	if(args.show):
 		plt.show()
+	plt.close()
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="run plots on dumped file from previous completion of `driver.py`")
@@ -74,14 +87,13 @@ if __name__ == '__main__':
 	# parser.add_argument('target', nargs='?', default='tests/matrix_multiply')
 	parser.add_argument('--show', action='store_true', help="")
 	parser.add_argument('--target', help="", required=False, default=None)
+	parser.add_argument('--acc_measure', help="accuracy measure", required=False, default=None)
 
 	args = parser.parse_args()
 
 	if args.command[0] == "frontier":
 		if args.target == None and len(args.command > 1):
 			args.target = args.command[1];
-
-		args.acc_measure = args.command[2] if len(args.command) > 2 else None
 
 		with open(os.path.join(args.target, 'results.json'), 'r') as rf:
 			data = json.load(rf)
