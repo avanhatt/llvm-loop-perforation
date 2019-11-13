@@ -9,11 +9,11 @@ from scipy import stats
 data is of the form { [JSON STRING RATES] => {return code: _, time: _, errors: {...}} }
 """
 def plot_frontier(data, args) :
+	measures = next(iter(data.values()))['errors'].keys()
+
 	if len(args.command) > 1:
 		acc_measure = args.command[1]
-
 	else: # do my maximum entropy:
-		measures = next(iter(data.values()))['errors'].keys()
 		acc_measure, bestent = None, 0
 		for m in measures:
 			ers = [erdata['errors'][m] for erdata in data.values()]
@@ -22,16 +22,31 @@ def plot_frontier(data, args) :
 				acc_measure, bestent = m, ent_m
 
 
-	canonicalList = [ (erdata['time'], erdata['errors'])  for erdata in data.values()]
+	canonicalList = [ (erdata['time'], erdata['errors']) for erdata in data.values()]
 	scatterTimeErr = [ (t, e[acc_measure]) for t,e in canonicalList]
 	times, errors = map(np.array, zip(*scatterTimeErr))
 
+
+	frontier = np.ones(times.shape, dtype=bool)
+	for i, (t1, es1) in enumerate(canonicalList):
+		for j, (t2, es2) in enumerate(canonicalList):
+			if i is j: continue
+
+			if t1 >= t2 and all(es1[m] >= es2[m] for m in measures):
+				print(i, ' beats ', j)
+				frontier[i] = False;
+
 	# frontier = [() for t,e in scatterTimeErr ]
+	print(frontier)
 
-
-	ax = plt.scatter(times, errors)
+	ax = plt.scatter(times, errors, c=np.where(frontier, 'g', 'b'))
 	ax.axes.set_xlabel('Runtime (seconds)')
 	ax.axes.set_ylabel('Normalized error (%s)' % acc_measure)
+
+	# ax.axes.set_xlim([-0.1, ax.axes.get_xlim()[1]])
+	x_step = np.around(times.max()/10, -int(np.ceil(np.log10(times.max())))-2 )
+	print(0, times.max(), x_step)
+	# ax.axes.set_xticks(np.arange(0, times.max(), x_step))
 
 	ax.axes.set_ylim([-0.1,1.1]);
 	ax.axes.set_yticks(np.linspace(0, 1, 11))

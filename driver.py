@@ -93,10 +93,9 @@ if __name__ == "__main__":
 		return R;
 
 	### This is all done below now.
-	# # make, run the standard version
-	# make_process = subprocess.call(['make', 'standard', 'TARGET={}'.format(target)])
-	# run_process = subprocess.Popen(['make', 'standard-run', 'TARGET={}'.format(target)])
-	# run_process.wait(timeout=TIMEOUT)
+	# # make, run the standard version, for output reasons
+	subprocess.call(['make', 'standard', 'TARGET={}'.format(target)])
+	subprocess.call(['make', 'standard-run', 'TARGET={}'.format(target)])
 
 	# initialize rate parameters to 1.
 	rate_params = { m : { f: {l : 1 for l in ld } for f,ld in fd.items()} for m,fd in infojson.items() }
