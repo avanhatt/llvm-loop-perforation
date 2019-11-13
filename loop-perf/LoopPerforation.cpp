@@ -63,6 +63,44 @@ namespace {
     return LoopStream.str();
   }
 
+  bool isLoopPerforable(Loop *L) {
+    // We don't modify unsimplified loops
+      bool IsSimple = L->isLoopSimplifyForm();
+      if (!IsSimple) {
+        return false;
+      }
+
+      // Find the canonical induction variable for this loop
+      PHINode *PHI = L->getCanonicalInductionVariable();
+
+      if (PHI == nullptr) {
+        return false;
+      }
+
+      // Find where the induction variable is modified by finding a user that
+      // is also an incoming value to the phi
+      Value *ValueToChange = nullptr;
+
+      for (auto User : PHI->users()) {
+        for (auto &Incoming : PHI->incoming_values()) {
+          if (Incoming == User) {
+            ValueToChange = Incoming;
+            break; // TODO: what if there are multiple?
+          }
+        }
+      }
+
+      if (ValueToChange == nullptr) {
+        return false;
+      }
+
+      if (!isa<BinaryOperator>(ValueToChange)) {
+        return false;
+      }
+
+      return true;
+  }
+
   struct LoopCountPass : public FunctionPass {
     static char ID;
     json j;
@@ -84,8 +122,11 @@ namespace {
 
     // Record the loop's basic blocks in the JSON and handle subloops
     void handleLoop(Function &F, Loop *L, int &NumLoops) {
-      NumLoops++;
-      j[F.getParent()->getName()][F.getName()][StringifyLoop(L)] = {};
+      if (isLoopPerforable(L)) {
+        NumLoops++;
+        j[F.getParent()->getName()][F.getName()][StringifyLoop(L)] = {};
+      }
+      // still handle subloops of non-perforable loops
       for (Loop *SubLoop : L->getSubLoops()) {
         handleLoop(F, SubLoop, NumLoops);
       }
@@ -129,18 +170,16 @@ namespace {
 
       const Function *F = L->getHeader()->getParent();
 
-      // We don't modify unsimplified loops
-      bool IsSimple = L->isLoopSimplifyForm();
-      if (!IsSimple) {
+      // only run this perforation pass on loops that were
+      // determined to be perforable and were inserted into
+      // loop-info.json by the info pass
+      if (!j.contains(F->getParent()->getName()) ||
+        !j[F->getParent()->getName()].contains(F->getName()) ||
+        !j[F->getParent()->getName()][F->getName()].contains(StringifyLoop(L)))
         return false;
-      }
 
       // Find the canonical induction variable for this loop
       PHINode *PHI = L->getCanonicalInductionVariable();
-
-      if (PHI == nullptr) {
-        return false;
-      }
 
       // Find where the induction variable is modified by finding a user that
       // is also an incoming value to the phi
@@ -155,30 +194,24 @@ namespace {
         }
       }
 
-      if (ValueToChange == nullptr) {
-        return false;
-      }
+      BinaryOperator *Increment = dyn_cast<BinaryOperator>(ValueToChange);
+      for (auto &Op : Increment->operands()) {
+        if (Op == PHI) continue;
 
-      if (isa<BinaryOperator>(ValueToChange)) {
-        BinaryOperator *Increment = dyn_cast<BinaryOperator>(ValueToChange);
-
-        for (auto &Op : Increment->operands()) {
-          if (Op == PHI) continue;
-
-          int LoopRate = 1;
-          if (!j.empty()) {
-            LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
-          }
-          Type *ConstType = Op->getType();
-          Constant *NewInc = ConstantInt::get(ConstType, LoopRate /*value*/, true /*issigned*/);
-
-          errs() << "Changing [" << *Op << "] to [" << *NewInc << "]!\n";
-
-          Op = NewInc;
-          return true;
+        int LoopRate = 1;
+        if (!j.empty()) {
+          LoopRate = j[F->getParent()->getName()][F->getName()][StringifyLoop(L)];
         }
-      }
+        Type *ConstType = Op->getType();
+        Constant *NewInc = ConstantInt::get(ConstType, LoopRate /*value*/, true /*issigned*/);
 
+        errs() << "Changing [" << *Op << "] to [" << *NewInc << "]!\n";
+
+        Op = NewInc;
+        return true;
+      }
+      
+      // should never reach here
       return false;
     }
   };
