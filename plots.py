@@ -4,6 +4,9 @@ from matplotlib import pyplot as plt
 import os
 import numpy as np
 from scipy import stats
+import seaborn as sns
+sns.set(style="ticks")
+seaborn_colors = sns.color_palette()
 
 """
 data is of the form { [JSON STRING RATES] => {return code: _, time: _, errors: {...}} }
@@ -38,7 +41,7 @@ def plot_frontier(data, args) :
 
 	# frontier = [() for t,e in scatterTimeErr ]
 
-	ax = plt.scatter(times, errors, c=np.where(frontier, 'g', 'b'))
+	ax = plt.scatter(times, errors, c=[seaborn_colors[i] for i in np.where(frontier, 6, 9)])
 	ax.axes.set_xlabel('Runtime (seconds)')
 	ax.axes.set_ylabel('Normalized error (%s)' % acc_measure)
 	ax.axes.set_title(target.split('/')[-1]);
