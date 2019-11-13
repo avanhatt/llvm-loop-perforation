@@ -64,41 +64,48 @@ namespace {
   }
 
   bool isLoopPerforable(Loop *L) {
+    // skip loops in functions containing "NO_PERF"
+    const Function *F = L->getHeader()->getParent();
+    if (F->getName().find("NO_PERF") != std::string::npos) {
+      errs() << "Skipping loop in function: " << F->getName() << "\n";
+      return false;
+    }
+
     // We don't modify unsimplified loops
-      bool IsSimple = L->isLoopSimplifyForm();
-      if (!IsSimple) {
-        return false;
-      }
+    bool IsSimple = L->isLoopSimplifyForm();
+    if (!IsSimple) {
+      return false;
+    }
 
-      // Find the canonical induction variable for this loop
-      PHINode *PHI = L->getCanonicalInductionVariable();
+    // Find the canonical induction variable for this loop
+    PHINode *PHI = L->getCanonicalInductionVariable();
 
-      if (PHI == nullptr) {
-        return false;
-      }
+    if (PHI == nullptr) {
+      return false;
+    }
 
-      // Find where the induction variable is modified by finding a user that
-      // is also an incoming value to the phi
-      Value *ValueToChange = nullptr;
+    // Find where the induction variable is modified by finding a user that
+    // is also an incoming value to the phi
+    Value *ValueToChange = nullptr;
 
-      for (auto User : PHI->users()) {
-        for (auto &Incoming : PHI->incoming_values()) {
-          if (Incoming == User) {
-            ValueToChange = Incoming;
-            break; // TODO: what if there are multiple?
-          }
+    for (auto User : PHI->users()) {
+      for (auto &Incoming : PHI->incoming_values()) {
+        if (Incoming == User) {
+          ValueToChange = Incoming;
+          break; // TODO: what if there are multiple?
         }
       }
+    }
 
-      if (ValueToChange == nullptr) {
-        return false;
-      }
+    if (ValueToChange == nullptr) {
+      return false;
+    }
 
-      if (!isa<BinaryOperator>(ValueToChange)) {
-        return false;
-      }
+    if (!isa<BinaryOperator>(ValueToChange)) {
+      return false;
+    }
 
-      return true;
+    return true;
   }
 
   struct LoopCountPass : public FunctionPass {
