@@ -10,9 +10,10 @@ data is of the form { [JSON STRING RATES] => {return code: _, time: _, errors: {
 """
 def plot_frontier(data, args) :
 	measures = next(iter(data.values()))['errors'].keys()
+	target = args.command[1]
 
-	if len(args.command) > 1:
-		acc_measure = args.command[1]
+	if len(args.command) > 2:
+		acc_measure = args.command[2]
 	else: # do my maximum entropy:
 		acc_measure, bestent = None, 0
 		for m in measures:
@@ -40,6 +41,7 @@ def plot_frontier(data, args) :
 	ax = plt.scatter(times, errors, c=np.where(frontier, 'g', 'b'))
 	ax.axes.set_xlabel('Runtime (seconds)')
 	ax.axes.set_ylabel('Normalized error (%s)' % acc_measure)
+	ax.axes.set_title(target.split('/')[-1]);
 
 	# ax.axes.set_xlim([-0.1, ax.axes.get_xlim()[1]])
 	x_step = np.around(times.max()/5, -int(np.ceil(np.log10(times.max()))-2) )
@@ -50,26 +52,37 @@ def plot_frontier(data, args) :
 	ax.axes.set_ylim([-0.1,1.1]);
 	ax.axes.set_yticks(np.linspace(0, 1, 11))
 
-	plt.savefig(os.path.join(args.target, 'frontier.png'), dpi=400)
+	plt.savefig(os.path.join(target, 'frontier.png'), dpi=400)
 	if(args.show):
 		plt.show()
 
 
-
+def plot_speedups():
+	pass
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description="run plots on dumped file from previous completion of `driver.py`")
-	parser.add_argument('target', nargs='?', default='tests/matrix_multiply')
 	parser.add_argument('command', help="The sub plot command: of [frontier]", nargs='+')
+	# parser.add_argument('target', nargs='?', default='tests/matrix_multiply')
 	parser.add_argument('--show', action='store_true', help="")
+	parser.add_argument('--base', action='store_true', help="")
 
-	argus = parser.parse_args()
+	args = parser.parse_args()
 
-	print('cmd', argus.command)
+	if args.command[0] == "frontier":
+		target = args.command[1];
+		with open(os.path.join(target, 'results.json'), 'r') as rf:
+			data = json.load(rf)
 
-	with open(os.path.join(argus.target, 'results.json'), 'r') as rf:
-		data = json.load(rf)
+		plot_frontier(data, args)
 
+	elif args.command[0] == "speedups":
+		data = {}
+		for subdir in ['benchmarks', 'tests']:
+			for base_name in os.listdir( os.path.join(args.base, subdir) ):
+				base_path = os.path.join(args.base, subdir, base_name)
 
-	if argus.command[0] == "frontier":
-		plot_frontier(data, argus)
+				if os.path.isdir(base_path):
+					with open(os.path.join(base_path, 'results.json'), 'r') as rf:
+						data_here = json.load(rf)
+					data[base_name] = data_here
