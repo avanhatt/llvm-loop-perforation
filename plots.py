@@ -79,7 +79,7 @@ def plot_speedups(data, args):
 				if '!joined_' in rates:
 					typ = 'Perforated'
 				if typ != None:
-					graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time': errors['time'], 'Trial' : j}, ignore_index=True)
+					graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time': rslt_dict['time'], 'Trial' : j}, ignore_index=True)
 	ax = sns.barplot(x="Benchmark", y="Time", hue="Type", data=graph_data)
 	plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 	plt.savefig('speedup.png', bbox_inches='tight', dpi=400)
