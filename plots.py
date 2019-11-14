@@ -64,8 +64,15 @@ def plot_frontier(data, args) :
 		alpha = 0.4,
 		linewidths = 0, s=100, zorder=0)
 
-	ax.axes.scatter(times[frontier], errors[frontier], zorder=1,
+
+	orig_idx = special==color_lookup['!original'];
+	ax.axes.scatter(times[orig_idx], errors[orig_idx], zorder=1, alpha=1,
+		c=special[orig_idx].tolist(), marker='o', s=100, linewidths=0, edgecolor=seaborn_colors[3])
+
+	ax.axes.scatter(times[frontier], errors[frontier], zorder=1, alpha=1,
 		c=special[frontier].tolist(), marker='o', s=100, linewidths=2, edgecolor=seaborn_colors[3])
+
+
 	# ax.axes.scatter(times[frontier], errors[frontier], s=1000, zorder=0, c=seaborn_colors[1])
 
 	ax.axes.set_xlabel('Runtime (seconds)')
@@ -83,7 +90,7 @@ def plot_frontier(data, args) :
 
 	# create fake markers for the legend
 	plt.plot([], [], marker='o', color=seaborn_colors[0], alpha=0.4, ls='None', markeredgewidth=0, label='Perforated')
-	plt.plot([], [], marker='o', color='k', alpha=0.4, ls='None', markeredgewidth=0, label='Program error') 
+	plt.plot([], [], marker='o', color='k', alpha=0.4, ls='None', markeredgewidth=0, label='Program error')
 	plt.plot([], [], marker='o', color=seaborn_colors[6], alpha=0.4, ls='None', markeredgewidth=0, label='Original')
 	plt.plot([], [], marker='o', color=seaborn_colors[9], alpha=0.4, ls='None', markeredgewidth=0, label='Best perforated')
 	plt.plot([], [], marker='o', color=seaborn_colors[0], alpha=1.0, ls='None', markeredgewidth=1, markeredgecolor=seaborn_colors[3], label='Frontier')
