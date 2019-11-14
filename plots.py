@@ -8,8 +8,10 @@ import seaborn as sns
 import pandas as pd
 
 sns.set(style="ticks")
+sns.set_palette("bright")
 seaborn_colors = sns.color_palette().as_hex()
  # [ '#%02X%02X%02X' % tuple(int(v*255) for v in rgb) for rgb in sns.color_palette() ]
+
 
 def hd(l):
 	return next(iter(l))
@@ -43,7 +45,7 @@ def plot_frontier(data, args) :
 	frontier = np.ones(times.shape, dtype=bool)
 	special =  np.empty(times.shape, dtype='object')
 
-	color_lookup = {'!original' : seaborn_colors[2], '!joined' : seaborn_colors[6]}
+	color_lookup = {'!original' : seaborn_colors[6], '!joined' : seaborn_colors[9]}
 	for i, (t1, es1, p, ec) in enumerate(canonicalList):
 		special[i] = color_lookup[p[:p.index('_')]] if p[0] == '!' else seaborn_colors[0]
 		if ec != 0:
@@ -63,7 +65,7 @@ def plot_frontier(data, args) :
 		linewidths = 0, s=100, zorder=0)
 
 	ax.axes.scatter(times[frontier], errors[frontier], zorder=1,
-		c=special[frontier].tolist(), marker='o', s=100, linewidths=2, linecolor='red')
+		c=special[frontier].tolist(), marker='o', s=100, linewidths=2, edgecolor=seaborn_colors[3])
 	# ax.axes.scatter(times[frontier], errors[frontier], s=1000, zorder=0, c=seaborn_colors[1])
 
 	ax.axes.set_xlabel('Runtime (seconds)')
@@ -79,12 +81,21 @@ def plot_frontier(data, args) :
 	ax.axes.set_ylim([-0.1,1.1]);
 	ax.axes.set_yticks(np.linspace(0, 1, 11))
 
-	plt.savefig(os.path.join(args.target, 'frontier.png'), dpi=400)
+	# create fake markers for the legend
+	plt.plot([], [], marker='o', color=seaborn_colors[0], alpha=0.4, ls='None', markeredgewidth=0, label='Perforated')
+	plt.plot([], [], marker='o', color='k', alpha=0.4, ls='None', markeredgewidth=0, label='Program error') 
+	plt.plot([], [], marker='o', color=seaborn_colors[6], alpha=0.4, ls='None', markeredgewidth=0, label='Original')
+	plt.plot([], [], marker='o', color=seaborn_colors[9], alpha=0.4, ls='None', markeredgewidth=0, label='Best perforated')
+	plt.plot([], [], marker='o', color=seaborn_colors[0], alpha=1.0, ls='None', markeredgewidth=1, markeredgecolor=seaborn_colors[3], label='Frontier')
+
+	plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+	plt.savefig(os.path.join(args.target, 'frontier.png'), bbox_inches='tight', dpi=400)
 	if(args.show):
 		plt.show()
 
 
 def plot_speedups(data, args):
+	plt.rcParams['figure.figsize'] = (7.6,4.8)
 	# convert to seaborn data format
 	graph_data = pd.DataFrame(columns=['Benchmark', 'Type', 'Time', 'Trial'])
 	for benchmark, all_rates in data.items():
