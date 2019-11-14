@@ -108,6 +108,15 @@ if __name__ == "__main__":
 	####################### NOW WE BEGIN ########################3
 	subprocess.call(['make', 'clean'])
 
+	# # make, run the standard version, for output reasons
+
+	subprocess.call(['make', 'standard', 'TARGET={}'.format(target)])
+	intact_proc = subprocess.Popen(['make', 'standard-run', 'TARGET={}'.format(target)])
+	intact_proc.wait()
+
+	if intact_proc.returncode:
+		raise RuntimeError("Standard run must succeed, failed with return code: {}".format(intact_proc.returncode))
+
 	# collect loop info to JSON file
 	make_process = subprocess.Popen(['make', 'loop-info', 'TARGET={}'.format(target)])
 	make_process.wait()
@@ -133,7 +142,6 @@ if __name__ == "__main__":
 		rslt_array = [ None ] * N_trials
 		for t in range(N_trials):
 			R = {}	# create the dictionary where we collect statistics
-
 			try:
 				start = time.time()
 				interp_process = subprocess.Popen(['make', 'perforated-run', 'TARGET={}'.format(target)])
@@ -167,15 +175,6 @@ if __name__ == "__main__":
 			rslt_array[t] = R
 
 		return rslt_array;
-
-	### This is all done below now.
-	# # make, run the standard version, for output reasons
-	subprocess.call(['make', 'standard', 'TARGET={}'.format(target)])
-	intact_proc = subprocess.Popen(['make', 'standard-run', 'TARGET={}'.format(target)])
-	intact_proc.wait()
-
-	if intact_proc.returncode:
-		raise RuntimeError("Standard run must succeed, failed with return code: {}".format(intact_proc.returncode))
 
 	def good_enough( R_list ):
 		return all(R['return_code'] == 0 and any(e < args.max_error for n,e in R['errors'].items())
