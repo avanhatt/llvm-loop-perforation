@@ -61,10 +61,10 @@ def plot_frontier(data, args) :
 		c = special[nofrontier].tolist(),
 		marker='o',
 		alpha = 0.4,
-		linewidths = 0, s=100 )
+		linewidths = 0, s=100, zorder=0)
 
-	ax.axes.scatter(times[frontier], errors[frontier], zorder=0,
-		c=special[frontier].tolist(), marker='s', s=200)
+	ax.axes.scatter(times[frontier], errors[frontier], zorder=1,
+		c=special[frontier].tolist(), marker='o', s=100, linewidths=2, linecolor='red')
 	# ax.axes.scatter(times[frontier], errors[frontier], s=1000, zorder=0, c=seaborn_colors[1])
 
 	ax.axes.set_xlabel('Runtime (seconds)')
