@@ -2,21 +2,21 @@
 #include <string.h>
 #include <stdlib.h>
 
-int SIZE = 500;
+int SIZE = 100;
 
-void free_matrix_NO_PERF(double **m) {
+void free_matrix(double **m) {
     for(int i = 0; i < SIZE; i++) free(m[i]);
     free(m);
 }
 
-double **empty_matrix_NO_PERF() {
+double **empty_matrix() {
     double **m = (double **)malloc(SIZE * sizeof(double*));
     for (int i = 0; i < SIZE; i++) m[i] = (double *)malloc(SIZE * sizeof(double));
     return m;
 }
 
-double **read_matrix_NO_PERF(char *fn) {
-    double **m = empty_matrix_NO_PERF();
+double **read_matrix(char *fn) {
+    double **m = empty_matrix();
 
     FILE * fp;
     char * line = NULL;
@@ -53,7 +53,7 @@ double **read_matrix_NO_PERF(char *fn) {
     return m;
 }
 
-void print_matrix_NO_PERF(double **M) {
+void print_matrix(double **M) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             printf("%f ", M[i][j]);
@@ -63,7 +63,7 @@ void print_matrix_NO_PERF(double **M) {
 }
 
 double **multiply(double **A, double **B) {
-    double **C = empty_matrix_NO_PERF();
+    double **C = empty_matrix();
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             C[i][j] = 0;
@@ -76,15 +76,15 @@ double **multiply(double **A, double **B) {
 }
 
 int main(int argc, char const *argv[]) {
-    double **A = read_matrix_NO_PERF("tests/matrix_multiply/A.txt");
-    double **B = read_matrix_NO_PERF("tests/matrix_multiply/B.txt");
+    double **A = read_matrix("tests/matrix_multiply/A.txt");
+    double **B = read_matrix("tests/matrix_multiply/B.txt");
     double **C = multiply(A, B);
 
-    print_matrix_NO_PERF(C);
+    print_matrix(C);
 
-    free_matrix_NO_PERF(A);
-    free_matrix_NO_PERF(B);
-    free_matrix_NO_PERF(C);
+    free_matrix(A);
+    free_matrix(B);
+    free_matrix(C);
 
     return 0;
 }
