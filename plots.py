@@ -54,7 +54,7 @@ def plot_frontier(data, args) :
 		for j, (t2, es2, _, _) in enumerate(canonicalList):
 			if i is j: continue
 
-			if t1 >= t2 and all(es1[m] >= es2[m] for m in measures):
+			if t1 > t2 and all(es1[m] >= es2[m] for m in measures):
 				frontier[i] = False;
 
 	nofrontier = np.logical_not(frontier);
@@ -66,7 +66,7 @@ def plot_frontier(data, args) :
 
 
 	orig_idx = special==color_lookup['!original'];
-	ax.axes.scatter(times[orig_idx], errors[orig_idx], zorder=1, alpha=1,
+	ax.axes.scatter(times[orig_idx], errors[orig_idx], zorder=1, alpha=0.4,
 		c=special[orig_idx].tolist(), marker='o', s=100, linewidths=0, edgecolor=seaborn_colors[3])
 
 	ax.axes.scatter(times[frontier], errors[frontier], zorder=1, alpha=1,
@@ -92,7 +92,7 @@ def plot_frontier(data, args) :
 	plt.plot([], [], marker='o', color=seaborn_colors[0], alpha=0.4, ls='None', markeredgewidth=0, label='Perforated')
 	plt.plot([], [], marker='o', color='k', alpha=0.4, ls='None', markeredgewidth=0, label='Program error')
 	plt.plot([], [], marker='o', color=seaborn_colors[6], alpha=0.4, ls='None', markeredgewidth=0, label='Original')
-	plt.plot([], [], marker='o', color=seaborn_colors[9], alpha=0.4, ls='None', markeredgewidth=0, label='Best perforated')
+	plt.plot([], [], marker='o', color=seaborn_colors[9], alpha=0.4, ls='None', markeredgewidth=0, label='Joined perforated')
 	plt.plot([], [], marker='o', color=seaborn_colors[0], alpha=1.0, ls='None', markeredgewidth=1, markeredgecolor=seaborn_colors[3], label='Frontier')
 
 	plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
@@ -102,9 +102,9 @@ def plot_frontier(data, args) :
 
 
 def plot_speedups(data, args):
-	plt.rcParams['figure.figsize'] = (7.6,4.8)
+	plt.rcParams['figure.figsize'] = (8.8,3.6)
 	# convert to seaborn data format
-	graph_data = pd.DataFrame(columns=['Benchmark', 'Type', 'Time', 'Trial'])
+	graph_data = pd.DataFrame(columns=['Benchmark', 'Type', 'Time (s)', 'Trial'])
 	for benchmark, all_rates in data.items():
 		for rates, rslt_list in all_rates.items():
 			for j,rslt_dict in enumerate(rslt_list):
@@ -114,8 +114,8 @@ def plot_speedups(data, args):
 				if '!joined_' in rates:
 					typ = 'Perforated'
 				if typ != None:
-					graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time': rslt_dict['time'], 'Trial' : j}, ignore_index=True)
-	ax = sns.barplot(x="Benchmark", y="Time", hue="Type", data=graph_data)
+					graph_data = graph_data.append({'Benchmark': benchmark, 'Type': typ, 'Time (s)': rslt_dict['time'], 'Trial' : j}, ignore_index=True)
+	ax = sns.barplot(x="Benchmark", y="Time (s)", hue="Type", data=graph_data)
 	plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 	plt.savefig('speedup.png', bbox_inches='tight', dpi=400)
 	if(args.show):
