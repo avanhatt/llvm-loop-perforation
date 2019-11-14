@@ -56,7 +56,6 @@ def plot_frontier(data, args) :
 				frontier[i] = False;
 
 	nofrontier = np.logical_not(frontier);
-	print(special[nofrontier], special[nofrontier].shape)
 	ax = plt.scatter(times[nofrontier], errors[nofrontier],
 		c = special[nofrontier].tolist(),
 		marker='o',
