@@ -3,16 +3,20 @@
 An LLVM pass that mangles your loops, on purpose!
 It's for LLVM 9.
 
-Build:
+To build the LLVM passes:
 
-    $ cd llvm-loop-perforation
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ make
-    $ cd ..
+    $ make pass
 
-Run:
+To run the driver with an existing benchmark or test:
 
-    $ clang -S -Xclang -disable-O0-optnone -emit-llvm foo.c
-    $ opt -load build/loop-perf/libLoopPerforationPass.* -loop-perf -S foo.ll
+    $ python3 driver.py <test_directory>
+
+This will produce a final, perforated LLVM IR file as:
+
+    $ <test_directory>/<source>-perforated.ll
+
+And executable as:
+
+    $ <test_directory>/perforated.out
+
+To define a new test or benchmark, place the source code inside a directory alongside an implementation of `error.py`. If your application requires input files, place them in the same directory and define them as arguments in a `Makefile`.
