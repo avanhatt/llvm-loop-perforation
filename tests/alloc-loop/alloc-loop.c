@@ -8,7 +8,7 @@ int do_thing(int n) {
        ptr_array[i] = (int *)malloc(10*sizeof(int));
     }
 
-    int sum = 0;
+    unsigned int sum = 0;
     // fill the slots with some complicated computations
     for (int i = 0; i < n; i ++) {
         for (int j = 0; j < 7 * n; j += (i+1)) {

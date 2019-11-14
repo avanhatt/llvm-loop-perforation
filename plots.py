@@ -54,7 +54,7 @@ def plot_frontier(data, args) :
 		for j, (t2, es2, _, _) in enumerate(canonicalList):
 			if i is j: continue
 
-			if t1 > t2 and all(es1[m] >= es2[m] for m in measures):
+			if t1 > t2 and all(es1[m] > es2[m] for m in measures):
 				frontier[i] = False;
 
 	nofrontier = np.logical_not(frontier);

@@ -3,7 +3,7 @@ sys.path.append('../..')
 from error_utils import *
 
 names_and_norms = [('l2', 2), ('froebenius', 'fro')]
-variances = [1, 100, 10000, 1000000]
+variances = [1, 100, 1000, 10000, 100000]
 names_and_args = [('%s_%d' % (name, variance), norm, variance)
   for name, norm in names_and_norms for variance in variances]
 error_names = [name for name, _, _ in names_and_args]

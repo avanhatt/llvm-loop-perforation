@@ -87,9 +87,9 @@ if __name__ == "__main__":
 	parser.add_argument('target', nargs='?', default='tests/matrix_multiply')
 	parser.add_argument('-t', '--timeout', default=5, type=int)
 	parser.add_argument('-e', '--max-error', default=0.5, type=float, help="the tolerance below which we will throw out loops")
-	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5])
+	parser.add_argument('--rates', nargs='+', type=int, required=False, default=[2,3,5,8,13,21])
 	parser.add_argument('--error_filter', type=str, required=False, default='.*')
-	parser.add_argument('--N-trials', type=int, required=False, default=11)
+	parser.add_argument('--N-trials', type=int, required=False, default=10)
 
 
 	args = parser.parse_args();
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 				perforated ='{}/perforated.txt'.format(target)
 				errors = {n: e for n, e in mod.error(standard, perforated).items() if n in filtered_error_names}
 
-				print("errors: ", errors)
+				print("time: ", R['time'])
 				R['errors'] = errors
 
 			except subprocess.TimeoutExpired:
