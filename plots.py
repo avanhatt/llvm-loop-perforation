@@ -6,8 +6,10 @@ import numpy as np
 from scipy import stats
 import seaborn as sns
 import pandas as pd
+
 sns.set(style="ticks")
-seaborn_colors = sns.color_palette()
+seaborn_colors = sns.color_palette().as_hex()
+ # [ '#%02X%02X%02X' % tuple(int(v*255) for v in rgb) for rgb in sns.color_palette() ]
 
 def hd(l):
 	return next(iter(l))
@@ -30,25 +32,41 @@ def plot_frontier(data, args) :
 
 	acc_measure = args.acc_measure
 
-	canonicalList = [ (erdata['time'], erdata['errors']) for erdatlist in data.values() \
+	canonicalList = [ (erdata['time'], erdata['errors'], paramstr, erdata['return_code'] ) for paramstr, erdatlist in data.items() \
 		for erdata in erdatlist ]
 
 	# print(hd(canonicalList)[1].keys())
-	scatterTimeErr = [ (t, e[acc_measure]) for t,e in canonicalList]
-	times, errors = map(np.array, zip(*scatterTimeErr))
+	scatterTimeErr = [ (t, e[acc_measure], p, ec) for t,e,p,ec in canonicalList]
+	times, errors, params, ercodes = map(np.array, zip(*scatterTimeErr))
 
 
 	frontier = np.ones(times.shape, dtype=bool)
-	for i, (t1, es1) in enumerate(canonicalList):
-		for j, (t2, es2) in enumerate(canonicalList):
+	special =  np.empty(times.shape, dtype='object')
+
+	color_lookup = {'!original' : seaborn_colors[2], '!joined' : seaborn_colors[6]}
+	for i, (t1, es1, p, ec) in enumerate(canonicalList):
+		special[i] = color_lookup[p[:p.index('_')]] if p[0] == '!' else seaborn_colors[0]
+		if ec != 0:
+			special[i] = '#000000'
+
+		for j, (t2, es2, _, _) in enumerate(canonicalList):
 			if i is j: continue
 
 			if t1 >= t2 and all(es1[m] >= es2[m] for m in measures):
 				frontier[i] = False;
 
-	# frontier = [() for t,e in scatterTimeErr ]
+	nofrontier = np.logical_not(frontier);
+	print(special[nofrontier], special[nofrontier].shape)
+	ax = plt.scatter(times[nofrontier], errors[nofrontier],
+		c = special[nofrontier].tolist(),
+		marker='o',
+		alpha = 0.4,
+		linewidths = 0, s=100 )
 
-	ax = plt.scatter(times, errors, c=[seaborn_colors[i] for i in np.where(frontier, 6, 9)])
+	ax.axes.scatter(times[frontier], errors[frontier], zorder=0,
+		c=special[frontier].tolist(), marker='s', s=200)
+	# ax.axes.scatter(times[frontier], errors[frontier], s=1000, zorder=0, c=seaborn_colors[1])
+
 	ax.axes.set_xlabel('Runtime (seconds)')
 	ax.axes.set_ylabel('Normalized error (%s)' % acc_measure)
 	ax.axes.set_title(args.target.split('/')[-1]);
